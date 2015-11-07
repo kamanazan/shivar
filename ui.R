@@ -23,23 +23,30 @@ shinyUI(fluidPage(
     
     #textInput("ticker", h3("Security ticker"), value="SPY"),
     
-    h3("VAR Type"),
+    h3("Pengaturan VAR"),
     
     selectInput("var_type", 
-                label = "choose type",
+                label = "Pilih Tipe Deterministik",
                 choices = c("both", "const",
-                            "all"),
+                            "trend","none"),
                 selected = "both"),
     
-    br(),
-    
-    h3("Lag Interval"),
-    
-    sliderInput("lag_max", h4("returns distribution"),
+    sliderInput("lag_max", h4("Interval Lag"),
                 min = 1,
                 max = 10,
                 value = 1
                 ),
+    
+    # Pemilihan variable yang akan diteliti
+    # TODO: 
+    #1. buat choices dinamis tergantung jenis data
+    #   yang digunakan
+    #2. Opsi 'semua' untuk menampilkan grafik semua kolom
+    selectInput("var_column", 
+                label = "Kolom yang diteliti",
+                choices = c("e", "prod",
+                            "rw","U"),
+                selected = "e"),
     width = 3
   ),
   

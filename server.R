@@ -35,7 +35,7 @@ shinyServer(
       vselect <- var_process()
       p_val <- vselect$selection[['SC(n)']]
       p1ct <- VAR(data_sumber[c("e","prod","rw","U")], p=p_val, type=input$var_type)
-      plot(p1ct, names="e")
+      plot(p1ct, names=input$var_column)
     })
   }
 )
