@@ -25,6 +25,8 @@ shinyUI(fluidPage(
     
     h3("Pengaturan VAR"),
     
+    fileInput("sumber_data", label="pilih data"),
+    
     selectInput("var_type", 
                 label = "Pilih Tipe Deterministik",
                 choices = c("both", "const",
@@ -42,11 +44,8 @@ shinyUI(fluidPage(
     #1. buat choices dinamis tergantung jenis data
     #   yang digunakan
     #2. Opsi 'semua' untuk menampilkan grafik semua kolom
-    selectInput("var_column", 
-                label = "Kolom yang diteliti",
-                choices = c("e", "prod",
-                            "rw","U"),
-                selected = "e"),
+    uiOutput('pilih_kolom'),
+    
     width = 3
   ),
   

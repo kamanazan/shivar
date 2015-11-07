@@ -12,14 +12,27 @@ library(ggplot2)
 #library(magrittr)
 library(vars)
 
-data_sumber <- read.csv("canada.csv")
+#data_sumber <- read.csv("canada.csv")
 
 shinyServer(
   function(input, output) {
     
+    data_sumber <- reactive({
+      read.csv(input$sumber_data$datapath)
+    })
+    
+    output$pilih_kolom <- renderUI({
+      kolom <- colnames(data_sumber())
+      selectInput("var_column", 
+                  label = "Kolom yang diteliti",
+                  choices = kolom,
+                  selected = kolom[2])
+    })
+    
     var_process <- reactive({
-      vr <- VARselect(data_sumber,lag.max=input$lag_max, type=input$var_type)
-      return(vr)
+     
+        vr <- VARselect(data_sumber(),lag.max=input$lag_max, type=input$var_type)
+      
     })
     
     output$var_select <- renderTable({ 
@@ -28,13 +41,14 @@ shinyServer(
     })
     
     output$data_table <- renderTable({
-      data_sumber
+      data_sumber()
     })
     
     output$var_result <- renderPlot({
       vselect <- var_process()
+      
       p_val <- vselect$selection[['SC(n)']]
-      p1ct <- VAR(data_sumber[c("e","prod","rw","U")], p=p_val, type=input$var_type)
+      p1ct <- VAR(data_sumber(), p=p_val, type=input$var_type)
       plot(p1ct, names=input$var_column)
     })
   }
