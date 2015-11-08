@@ -25,25 +25,54 @@ shinyServer(function(input, output) {
   })
   
   var_process <- reactive({
-    vr <-
-      VARselect(data_sumber(),lag.max = input$lag_max, type = input$var_type)
-    
+    datanya <- data_sumber()
+    if (length(datanya) > 0)
+      vr <-
+        VARselect(data_sumber(),lag.max = input$lag_max, type = input$var_type)
+    else
+      vr <- NULL
+  })
+  
+  var_analysis <- reactive({
+    vselect <- var_process()
+    p_val <- vselect$selection[['SC(n)']]
+    p1ct <- VAR(data_sumber(), p = p_val, type = input$var_type)
+    return(p1ct)
+  })
+  
+  arch_test <- reactive({
+    va <- var_analysis()
+    arch <- arch.test(va, lags.multi=5)
+  })
+  
+  stable_test <- reactive({
+    return(stability(var_analysis()))
   })
   
   output$var_select <- renderTable({
     vselect <- var_process()
+    if (!is.null(vselect))
     vselect$criteria
   })
   
   output$data_table <- renderTable({
-    data_sumber()
+    if (length(data_sumber()) > 0)
+      data_sumber()
   })
   
   output$var_result <- renderPlot({
     vselect <- var_process()
-    
-    p_val <- vselect$selection[['SC(n)']]
-    p1ct <- VAR(data_sumber(), p = p_val, type = input$var_type)
-    plot(p1ct, names = input$var_column)
+    if (!is.null(vselect)) {
+      va <- var_analysis()
+      plot(va, names = input$var_column, nc = 2, addbars = 1)
+    }
+  })
+  
+  output$residual <- renderPlot({
+    plot(arch_test(), names = input$var_column, nc=2, addbbars = 1)
+  })
+  
+  output$stability <- renderPlot({
+    plot(stable_test(), nc = 2)
   })
 })

@@ -55,14 +55,14 @@ shinyUI(fluidPage(
     ),
     
     mainPanel(tabsetPanel(
-      position = c("right"),
+      position = c("above"),
       tabPanel(strong("Plots"),
                br(),
                plotOutput("var_result"),
                br()),
       
       tabPanel(
-        strong("Data"),
+        strong("Summary"),
         br(),
         tableOutput("var_select"),
         br(),
@@ -70,11 +70,19 @@ shinyUI(fluidPage(
       ),
       
       tabPanel(
-        strong("Annualized data"),
+        strong("Data"),
         br(),
         tableOutput("data_table"),
         br()
-      )
+      ),
+      
+      tabPanel(strong("TEST"),
+               tabsetPanel(
+        tabPanel("Residual", plotOutput("residual")),
+        tabPanel("Stability", plotOutput("stability")),
+        position = 'right'
+        
+      ))
       
     ))
   )
