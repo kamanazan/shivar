@@ -17,7 +17,7 @@ shinyUI(fluidPage(
       )
       )),
   
-  titlePanel("VAR analysis"),
+  titlePanel("Prediksi Ekonomi Jawa Barat"),
   
   br(),
   
@@ -76,7 +76,7 @@ shinyUI(fluidPage(
         br()
       ),
       
-      tabPanel(strong("TEST"),
+      tabPanel(strong("Test"),
                tabsetPanel(
         tabPanel("Residual", plotOutput("residual")),
         tabPanel("Stability", plotOutput("stability")),
