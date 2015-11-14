@@ -61,29 +61,26 @@ shinyUI(fluidPage(
                plotOutput("var_result"),
                br()),
       
-      tabPanel(
-        strong("Summary"),
-        br(),
-        tableOutput("var_select"),
-        br(),
-        br()
-      ),
+      tabPanel(strong("Summary"),
+               br(),
+               tableOutput("var_select"),
+               br(),
+               br()),
       
-      tabPanel(
-        strong("Data"),
-        br(),
-        tableOutput("data_table"),
-        br()
-      ),
+      tabPanel(strong("Data"),
+               tabsetPanel(
+                 tabPanel("Data upload", tableOutput("data_table")),
+                 tabPanel("Data summary", tableOutput("data_summary"))
+               )),
       
       tabPanel(strong("Test"),
                tabsetPanel(
-        tabPanel("Residual", plotOutput("residual")),
-        tabPanel("Stability", plotOutput("stability")),
-        position = 'right'
-        
-      ))
+                 tabPanel("Residual", plotOutput("residual")),
+                 tabPanel("Stability", plotOutput("stability")),
+                 position = 'right'
+                 
+               ))
       
     ))
   )
-      ))
+))

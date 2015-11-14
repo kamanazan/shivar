@@ -60,6 +60,11 @@ shinyServer(function(input, output) {
       data_sumber()
   })
   
+  output$data_summary <- renderTable({
+    if (length(data_sumber()) > 0)
+      summary(data_sumber())
+  })
+  
   output$var_result <- renderPlot({
     vselect <- var_process()
     if (!is.null(vselect)) {
