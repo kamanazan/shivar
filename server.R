@@ -6,8 +6,8 @@ library(vars)
 
 shinyServer(function(input, output) {
   data_sumber <- reactive({
-    if (length(input$sumber_data$name) > 0){
-      dt <-read.csv(input$sumber_data$datapath)
+    if (length(input$sumber_data$name) > 0) {
+      dt <- read.csv(input$sumber_data$datapath)
     }
     else
       dt <- list()
@@ -28,7 +28,7 @@ shinyServer(function(input, output) {
     datanya <- data_sumber()
     if (length(datanya) > 0)
       vr <-
-        VARselect(data_sumber(),lag.max = input$lag_max, type = input$var_type)
+        VARselect(data_sumber(),lag.max = input$lag_max)
     else
       vr <- NULL
   })
@@ -36,13 +36,13 @@ shinyServer(function(input, output) {
   var_analysis <- reactive({
     vselect <- var_process()
     p_val <- vselect$selection[['SC(n)']]
-    p1ct <- VAR(data_sumber(), p = p_val, type = input$var_type)
+    p1ct <- VAR(data_sumber(), p = p_val)
     return(p1ct)
   })
   
   arch_test <- reactive({
     va <- var_analysis()
-    arch <- arch.test(va, lags.multi=5)
+    arch <- arch.test(va, lags.multi = 5)
   })
   
   stable_test <- reactive({
@@ -52,7 +52,7 @@ shinyServer(function(input, output) {
   output$var_select <- renderTable({
     vselect <- var_process()
     if (!is.null(vselect))
-    vselect$criteria
+      vselect$criteria
   })
   
   output$data_table <- renderTable({
@@ -69,12 +69,16 @@ shinyServer(function(input, output) {
     vselect <- var_process()
     if (!is.null(vselect)) {
       va <- var_analysis()
-      plot(va, names = input$var_column, nc = 2, addbars = 1)
+      plot(
+        va, names = input$var_column, nc = 2
+      )
     }
   })
   
   output$residual <- renderPlot({
-    plot(arch_test(), names = input$var_column, nc=2, addbbars = 1)
+    plot(
+      arch_test(), names = input$var_column, nc = 2
+    )
   })
   
   output$stability <- renderPlot({

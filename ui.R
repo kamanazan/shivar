@@ -28,15 +28,7 @@ shinyUI(fluidPage(
       h3("Pengaturan VAR"),
       
       fileInput("sumber_data", label = "pilih data"),
-      
-      selectInput(
-        "var_type",
-        label = "Pilih Tipe Deterministik",
-        choices = c("both", "const",
-                    "trend","none"),
-        selected = "both"
-      ),
-      
+
       sliderInput(
         "lag_max", h4("Interval Lag"),
         min = 1,
