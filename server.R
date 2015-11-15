@@ -40,6 +40,12 @@ shinyServer(function(input, output) {
     return(p1ct)
   })
   
+  var_residual <- reactive({
+    va <- var_analysis()
+    rds <- residuals(va)
+    return(rds)
+  })
+  
   arch_test <- reactive({
     va <- var_analysis()
     arch <- arch.test(va, lags.multi = 5)
@@ -65,20 +71,44 @@ shinyServer(function(input, output) {
       summary(data_sumber())
   })
   
-  output$var_result <- renderPlot({
+  output$var_fit <- renderPlot({
     vselect <- var_process()
     if (!is.null(vselect)) {
       va <- var_analysis()
-      plot(
-        va, names = input$var_column, nc = 2
+      resids <- var_residual()
+      plot.ts(
+        resids[,input$var_column], main = paste("Diagram Fit untuk ",input$var_column), ylab =
+          "value"
+      )
+    }
+  })
+  
+  output$acf_residual <- renderPlot({
+    vselect <- var_process()
+    if (!is.null(vselect)) {
+      va <- var_analysis()
+      resids <- var_residual()
+      acf(
+        resids[,input$var_column], main = paste("ACF Residual untuk ",input$var_column), lag.max =
+          12
+      )
+    }
+  })
+  
+  output$pacf_residual <- renderPlot({
+    vselect <- var_process()
+    if (!is.null(vselect)) {
+      va <- var_analysis()
+      resids <- var_residual()
+      pacf(
+        resids[,input$var_column], main = paste("PACF Residual untuk ",input$var_column), lag.max =
+          12
       )
     }
   })
   
   output$residual <- renderPlot({
-    plot(
-      arch_test(), names = input$var_column, nc = 2
-    )
+    plot(arch_test(), names = input$var_column, nc = 2)
   })
   
   output$stability <- renderPlot({

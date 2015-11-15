@@ -28,7 +28,7 @@ shinyUI(fluidPage(
       h3("Pengaturan VAR"),
       
       fileInput("sumber_data", label = "pilih data"),
-
+      
       sliderInput(
         "lag_max", h4("Interval Lag"),
         min = 1,
@@ -46,33 +46,42 @@ shinyUI(fluidPage(
       width = 3
     ),
     
-    mainPanel(tabsetPanel(
-      position = c("above"),
-      tabPanel(strong("Plots"),
-               br(),
-               plotOutput("var_result"),
-               br()),
-      
-      tabPanel(strong("Summary"),
-               br(),
-               tableOutput("var_select"),
-               br(),
-               br()),
-      
-      tabPanel(strong("Data"),
-               tabsetPanel(
-                 tabPanel("Data upload", tableOutput("data_table")),
-                 tabPanel("Data summary", tableOutput("data_summary"))
-               )),
-      
-      tabPanel(strong("Test"),
-               tabsetPanel(
-                 tabPanel("Residual", plotOutput("residual")),
-                 tabPanel("Stability", plotOutput("stability")),
-                 position = 'right'
-                 
-               ))
-      
-    ))
+    mainPanel(
+      tabsetPanel(
+        position = c("above"),
+        tabPanel(
+          strong("Plots"),
+          br(),
+          plotOutput("var_fit"),
+          br(),
+          plotOutput("acf_residual"),
+          br(),
+          plotOutput("pacf_residual")
+        ),
+        
+        tabPanel(strong("Summary"),
+                 br(),
+                 tableOutput("var_select"),
+                 br(),
+                 br()),
+        
+        tabPanel(strong("Data"),
+                 tabsetPanel(
+                   tabPanel("Data upload", tableOutput("data_table")),
+                   tabPanel("Data summary", tableOutput("data_summary"))
+                 )),
+        
+        tabPanel(
+          strong("Test"),
+          tabsetPanel(
+            tabPanel("Residual", plotOutput("residual")),
+            tabPanel("Stability", plotOutput("stability")),
+            position = 'right'
+            
+          )
+        )
+        
+      )
+    )
   )
-))
+      ))
