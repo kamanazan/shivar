@@ -17,7 +17,7 @@ shinyUI(fluidPage(
       )
       )),
   
-  titlePanel("Prediksi Ekonomi Jawa Barat"),
+  titlePanel("Model Proyeksi Pertumbuhan Ekonomi Jabar"),
   
   br(),
   
