@@ -1,6 +1,7 @@
 library(shiny)
 library(ggplot2)
 library(vars)
+library(tseries)
 
 #data_sumber <- read.csv("canada.csv")
 
@@ -22,6 +23,44 @@ shinyServer(function(input, output) {
       choices = kolom,
       selected = kolom[2]
     )
+  })
+  
+  get_summary <- reactive({
+    dt <- data_sumber()
+    sr <- summary(dt)
+    # Membuat table summary yang baru
+    num_of_col = length(colnames(sr))
+    num_of_row = 7
+    tot_elm = num_of_row * num_of_col
+    new_sr <- array(1:tot_elm, dim=c(num_of_row, num_of_col))
+    colnames(new_sr) <- colnames(sr)
+    
+    for(col in 1: num_of_col) 
+    {
+      for(row in 1:num_of_row)
+      {
+        if (row == 7) 
+        {
+          adf_test <- adf.test(dt[,col])
+          if (adf_test$alternative == "stationary")
+          {
+            new_sr[row,col] = paste("Stationer: Ya  ")
+          } 
+          else
+          {
+            new_sr[row,col] == paste("Stationer: Tidak  ")
+          }
+        }
+        else
+        {
+          new_sr[row,col] = sr[row,col]
+        }
+        
+      } 
+    }
+    tbl <- as.table(new_sr)
+    row.names(tbl) <- NULL
+    return(tbl)
   })
   
   var_process <- reactive({
@@ -68,7 +107,7 @@ shinyServer(function(input, output) {
   
   output$data_summary <- renderTable({
     if (length(data_sumber()) > 0)
-      summary(data_sumber())
+      get_summary()
   })
   
   output$var_fit <- renderPlot({
