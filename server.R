@@ -63,6 +63,31 @@ shinyServer(function(input, output) {
     return(tbl)
   })
   
+  identifikasi <- reactive({
+    dt <- data_sumber()
+    
+    # Membuat table summary yang baru
+    num_of_col = length(colnames(dt))
+    num_of_row = 4
+    tot_elm = num_of_row * num_of_col
+    tbl <- array(1:tot_elm, dim=c(num_of_row, num_of_col))
+    
+    colnames(tbl) <- colnames(dt)
+    rownames(tbl) <- c("Dickey-Fuller", "Lag Order", "Nilai P", "Kesimpulan")
+    for(col in 1: num_of_col) 
+    {
+      adf_test <- adf.test(dt[,col])
+      tbl["Dickey-Fuller",col] <- adf_test$statistic[[1]]
+      tbl["Lag Order",col] <- adf_test$parameter[[1]]
+      tbl["Nilai P",col] <- adf_test$p.value[[1]]
+      tbl["Kesimpulan",col] <- adf_test$alternative
+      #tbl["Dickey-Fuller",col] <- c(stat, param, p_val, is_sti)
+      
+    }
+    
+    return(as.table(tbl))
+  })
+  
   var_process <- reactive({
     datanya <- data_sumber()
     if (length(datanya) > 0)
@@ -146,11 +171,8 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$residual <- renderPlot({
-    plot(arch_test(), names = input$var_column, nc = 2)
-  })
-  
-  output$stability <- renderPlot({
-    plot(stable_test(), nc = 2)
+  output$identifikasi <- renderTable({
+    if (length(data_sumber()) > 0)
+      identifikasi()
   })
 })

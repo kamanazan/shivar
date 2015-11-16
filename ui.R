@@ -72,13 +72,11 @@ shinyUI(fluidPage(
                  )),
         
         tabPanel(
-          strong("Test"),
-          tabsetPanel(
-            tabPanel("Residual", plotOutput("residual")),
-            tabPanel("Stability", plotOutput("stability")),
-            position = 'right'
-            
-          )
+          strong("Identifikasi"),
+          br(),
+          h1("Augmented Dickey-Fuller Test"),
+          br(),
+          tableOutput("identifikasi")
         )
         
       )
