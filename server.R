@@ -2,8 +2,40 @@ library(shiny)
 library(ggplot2)
 library(vars)
 library(tseries)
+library(forecast)
 
 #data_sumber <- read.csv("canada.csv")
+
+process_data <- function(dataset){
+	p.orig <- adf.test(dataset)$p.value
+	
+	# Transformasi
+	lambda <- BoxCox.lambda(dataset)
+	data.trans <- BoxCox(dataset, lambda)
+	p.trans <- adf.test(data.trans)$p.value
+
+	# Differencing
+	data.diff <- diff(dataset, lag=1, d=1)
+	p.diff <- adf.test(data.diff)$p.value
+
+	#both
+	data.both <- diff(data.trans, lag=1, d=1)
+	p.both <- adf.test(data.both)$p.value
+	
+	if (p.orig < 0.1){
+		dt <- dataset
+		met <- 'orig'
+	}else if (p.trans < 0.1){
+		dt <- data.trans
+		met <- 'trans'
+	}else if (p.diff < 0.1){
+		dt <- data.diff
+		met <- 'diff'
+	}else{
+		dt <- data.both
+		met <- 'both'
+	}
+}
 
 shinyServer(function(input, output) {
   data_sumber <- reactive({
