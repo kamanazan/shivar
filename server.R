@@ -16,33 +16,16 @@ proses_data <- function(dataset) {
   p.trans <- adf_trans$p.value
   
   # Differencing
-  data.diff <- diff(dataset, lag = 1, d = 1)
-  adf_diff <- adf.test(data.diff)
-  p.diff <- adf_diff$p.value
-  
-  #both
-  data.both <- diff(data.trans, lag = 1, d = 1)
-  adf_both <- adf.test(data.both) 
-  p.both <- adf_both$p.value
-  
-  if (p.orig < 0.1) {
-    dt <- dataset
-    met <- 'orig'
-    adf <- NULL
-  }else if (p.trans < 0.1) {
-    dt <- data.trans
-    met <- 'trans'
-    adf <- adf_trans
-  }else if (p.diff < 0.1) {
-    dt <- data.diff
-    met <- 'diff'
-    adf <- adf_diff
-  }else{
-    dt <- data.both
-    met <- 'both'
-    adf <- adf_both
+  p.diff = 1
+  data.diff = data.trans
+  while (p.diff > 0.05){
+    data.diff <- diff(data.diff, lag = 1, d = 1)
+    adf_diff <- adf.test(data.diff)
+    p.diff <- adf_diff$p.value
+    
   }
-  return(list(dt=dt, met=met, adf=adf))  
+  
+  return(list(d.trans=data.trans, d.diff=data.diff))  
 }
 
 shinyServer(function(input, output) {
