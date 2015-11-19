@@ -59,14 +59,16 @@ shinyServer(function(input, output) {
     datanya <- data_sumber()
     nama_kolom <- colnames(datanya)
     num_of_col <- length(nama_kolom)
-    data_proses <- list() # pake nama yang lebih jelalah
+    data_proses <- vector('list',3)
     
     for (col in 1:num_of_col) {
+      
       hasil_proses <- proses_data(datanya[,col])
       
-      data_proses[nama_kolom[col]] <- list(dt=hasil_proses$dt, met=hasil_proses$met, adf=hasil_proses$adf)
+      data_proses[[nama_kolom[col]]] <- list(dt=hasil_proses$dt, met=hasil_proses$met, adf=hasil_proses$adf)
+      
     }
-    print(data_proses)
+    
     return(data_proses)
   })
   
@@ -214,23 +216,50 @@ shinyServer(function(input, output) {
   output$identifikasi <- renderTable({
     if (length(data_sumber()) > 0){
      anu <- ambil_data()
-    kolom <- anu[input$var_column]
-    print(kolom)
+    kolom <- anu[[input$var_column]]
     # Membuat table summary yang baru
     num_of_col = 1
     num_of_row = 4
     tot_elm = num_of_row * num_of_col
     tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
     
-    colnames(tbl) <- colnames(dt)
+    colnames(tbl) <- input$var_column
     rownames(tbl) <-
       c("Dickey-Fuller", "Lag Order", "Nilai P", "Kesimpulan")
     
     
-    tbl["Dickey-Fuller",col] <- kolom$adf$statistic[[1]]
-    tbl["Lag Order",col] <- kolom$adf$parameter[[1]]
-    tbl["Nilai P",col] <- kolom$adf$p.value[[1]]
-    tbl["Kesimpulan",col] <- kolom$met
+    tbl["Dickey-Fuller",1] <- kolom$adf$statistic[[1]]
+    tbl["Lag Order",1] <- kolom$adf$parameter[[1]]
+    tbl["Nilai P",1] <- kolom$adf$p.value[[1]]
+    tbl["Kesimpulan",1] <- kolom$met
+    tbl
     }
+  })
+  
+  output$id_ts <- renderPlot({
+    if (length(data_sumber()) > 0)
+      anu <- ambil_data()
+    kolom <- anu[[input$var_column]]
+    dt <- kolom$dt
+    plot.ts(dt, main = paste("Plot untuk ",input$var_column), ylab =
+              "value")
+  })
+  
+  output$id_acf <- renderPlot({
+    if (length(data_sumber()) > 0)
+      anu <- ambil_data()
+    kolom <- anu[[input$var_column]]
+    dt <- kolom$dt
+    resid <- acf(dt)
+    plot(resid, main = paste("ACF Residual untuk ",input$var_column))
+  })
+  
+  output$id_pacf <- renderPlot({
+    if (length(data_sumber()) > 0)
+      anu <- ambil_data()
+    kolom <- anu[[input$var_column]]
+    dt <- kolom$dt
+    resid <- pacf(dt,plot=FALSE)
+    plot(resid, main = paste("PACF Residual untuk ",input$var_column))
   })
 })
