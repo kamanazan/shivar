@@ -52,11 +52,11 @@ shinyUI(fluidPage(
         tabPanel(
           strong("Plots"),
           br(),
-          plotOutput("var_fit"),
+          plotOutput("asli_ts"),
           br(),
-          plotOutput("acf_residual"),
+          plotOutput("asli_acf"),
           br(),
-          plotOutput("pacf_residual")
+          plotOutput("asli_pacf")
         ),
         
         tabPanel(strong("Summary"),
@@ -76,7 +76,12 @@ shinyUI(fluidPage(
           br(),
           h1("Augmented Dickey-Fuller Test"),
           br(),
-          tableOutput("identifikasi")
+          tableOutput("identifikasi"),
+          plotOutput("id_ts"),
+          br(),
+          plotOutput("id_acf"),
+          br(),
+          plotOutput("id_pacf")
         )
         
       )
