@@ -46,7 +46,20 @@ shinyServer(function(input, output) {
       dt <- list()
     return(dt)
   })
-  
+
+  ambil_data <- reactive({
+  	datanya <- data_sumber()
+	nama_kolom <- colnames(datanya)
+	num_of_col <- length(nama_kolom)
+	data_proses <- list() # pake nama yang lebih jelalah
+	
+	for(col in 1:num_of_col){
+           hasil_proses <- proses_data(datanya[,col])
+	   data_proses(nama_kolom[col]=hasil_proses)
+        }
+	return(data_proses)
+  }) 
+
   output$pilih_kolom <- renderUI({
     kolom <- colnames(data_sumber())
     selectInput(
