@@ -18,14 +18,14 @@ proses_data <- function(dataset) {
   # Differencing
   p.diff = 1
   data.diff = data.trans
-  while (p.diff > 0.05){
+  while (p.diff > 0.05) {
     data.diff <- diff(data.diff, lag = 1, d = 1)
     adf_diff <- adf.test(data.diff)
     p.diff <- adf_diff$p.value
     
   }
   
-  return(list(d.trans=data.trans, d.diff=data.diff))  
+  return(list(d.trans = data.trans, d.diff = data.diff))
 }
 
 shinyServer(function(input, output) {
@@ -45,15 +45,12 @@ shinyServer(function(input, output) {
     data_proses <- vector('list')
     
     for (col in 1:num_of_col) {
-      print('NAMAKOLOM:')
-      print(nama_kolom[col])
       hasil <- proses_data(datanya[,col])
-      print(hasil)
-      data_proses[[nama_kolom[col]]] <- list(d.diff=hasil$d.diff, d.trans=hasil$d.trans)
-      print('============================')
+      data_proses[[nama_kolom[col]]] <-
+        list(d.diff = hasil$d.diff, d.trans = hasil$d.trans)
+      
     }
-    print('-----------------------')
-    print(data_proses)
+    
     return(data_proses)
   })
   
@@ -85,7 +82,7 @@ shinyServer(function(input, output) {
     tbl["Lag Order",col] <- adf_test$parameter[[1]]
     tbl["Nilai P",col] <- adf_test$p.value[[1]]
     tbl["Kesimpulan",col] <- adf_test$alternative
-
+    
     return(as.table(tbl))
   })
   
@@ -137,7 +134,7 @@ shinyServer(function(input, output) {
   })
   
   output$asli_ts <- renderPlot({
-    if (length(data_sumber()) > 0){
+    if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       plot.ts(dt[,input$var_column], main = paste("Diagram Fit untuk ",input$var_column), ylab =
                 "value")
@@ -145,7 +142,7 @@ shinyServer(function(input, output) {
   })
   
   output$asli_acf <- renderPlot({
-    if (length(data_sumber()) > 0){
+    if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       resid <- acf(dt[,input$var_column])
       plot(resid, main = paste("ACF Residual untuk ",input$var_column))
@@ -153,16 +150,16 @@ shinyServer(function(input, output) {
   })
   
   output$asli_pacf <- renderPlot({
-    if (length(data_sumber()) > 0){
+    if (length(data_sumber()) > 0) {
       dt <- data_sumber()
-      resid <- pacf(dt[,input$var_column],plot=FALSE)
+      resid <- pacf(dt[,input$var_column],plot = FALSE)
       plot(resid, main = paste("PACF Residual untuk ",input$var_column))
     }
-      
+    
   })
   
   output$data_transformasi <- renderTable({
-    if (length(data_sumber()) > 0){
+    if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
       # Membuat table summary yang baru
@@ -173,7 +170,7 @@ shinyServer(function(input, output) {
       tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
       colnames(tbl) <- colnames(dt)
       
-      for (col in 1:num_of_col ){
+      for (col in 1:num_of_col) {
         nama_kolom <- colnames(tbl)[col]
         datanya <- anu[[col]]$d.trans
         tbl[,col] <- datanya
@@ -184,7 +181,7 @@ shinyServer(function(input, output) {
   })
   
   output$data_differencing <- renderTable({
-    if (length(data_sumber()) > 0){
+    if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
       # Membuat table summary yang baru
@@ -195,18 +192,73 @@ shinyServer(function(input, output) {
       tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
       colnames(tbl) <- colnames(dt)
       
-      for (col in 1:num_of_col ){
+      for (col in 1:num_of_col) {
         nama_kolom <- colnames(tbl)[col]
         datanya <- anu[[col]]$d.diff
         ln <- length(datanya)
-        if (ln < num_of_row){
+        if (ln < num_of_row) {
           selisih <- num_of_row - ln
-          for (i in 1:selisih) datanya <- c(datanya, NA)
+          for (i in 1:selisih)
+            datanya <- c(datanya, NA)
         }
         tbl[,col] <- datanya
       }
       
       tbl
+    }
+  })
+  
+  output$id_ts <- renderPlot({
+    if (length(data_sumber()) > 0) {
+      anu <- ambil_data()
+      kolom <- anu[[input$var_column]]
+      dt <- kolom$d.trans
+      df <- kolom$d.diff
+      par(mfrow = c(1,2))
+      plot.ts(
+        dt, main = paste("Plot untuk ",input$var_column, "setelah Transformasi"), ylab =
+          "value"
+      )
+      plot.ts(
+        df, main = paste("Plot untuk ",input$var_column, "setelah differencing"), ylab =
+          "value"
+      )
+    }
+  })
+  
+  output$id_acf <- renderPlot({
+    if (length(data_sumber()) > 0) {
+      anu <- ambil_data()
+      kolom <- anu[[input$var_column]]
+      dt <- acf(kolom$d.trans)
+      df <- acf(kolom$d.diff)
+      par(mfrow = c(1,2))
+      plot(
+        dt, main = paste("ACF untuk ",input$var_column, "setelah Transformasi"), ylab =
+          "value"
+      )
+      plot(
+        df, main = paste("ACF untuk ",input$var_column, "setelah differencing"), ylab =
+          "value"
+      )
+    }
+  })
+  
+  output$id_pacf <- renderPlot({
+    if (length(data_sumber()) > 0) {
+      anu <- ambil_data()
+      kolom <- anu[[input$var_column]]
+      dt <- pacf(kolom$d.trans)
+      df <- pacf(kolom$d.diff)
+      par(mfrow = c(1,2))
+      plot(
+        dt, main = paste("PACF untuk ",input$var_column, "setelah Transformasi"), ylab =
+          "value"
+      )
+      plot(
+        df, main = paste("PACF untuk ",input$var_column, "setelah differencing"), ylab =
+          "value"
+      )
     }
   })
   

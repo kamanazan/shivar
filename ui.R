@@ -76,7 +76,11 @@ shinyUI(fluidPage(
           tabsetPanel(
             tabPanel("Data Hasil Transformasi", tableOutput("data_transformasi")),
             tabPanel("Data Hasil Differencing", tableOutput("data_differencing")),
-            tabPanel("Hasil Test ADF", tableOutput("hasil_adf"))
+            tabPanel("Hasil Test ADF", 
+                     tableOutput("hasil_adf"),
+                     plotOutput('id_ts'),
+                     plotOutput('id_acf'),
+                     plotOutput('id_pacf'))
           ))
         
       )
