@@ -73,16 +73,11 @@ shinyUI(fluidPage(
         
         tabPanel(
           strong("Identifikasi"),
-          br(),
-          h1("Augmented Dickey-Fuller Test"),
-          br(),
-          tableOutput("identifikasi"),
-          plotOutput("id_ts"),
-          br(),
-          plotOutput("id_acf"),
-          br(),
-          plotOutput("id_pacf")
-        )
+          tabsetPanel(
+            tabPanel("Data Hasil Transformasi", tableOutput("data_transformasi")),
+            tabPanel("Data Hasil Differencing", tableOutput("data_differencing")),
+            tabPanel("Hasil Test ADF", tableOutput("hasil_adf"))
+          ))
         
       )
     )

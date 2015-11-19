@@ -42,16 +42,18 @@ shinyServer(function(input, output) {
     datanya <- data_sumber()
     nama_kolom <- colnames(datanya)
     num_of_col <- length(nama_kolom)
-    data_proses <- vector('list',3)
+    data_proses <- vector('list')
     
     for (col in 1:num_of_col) {
-      
-      hasil_proses <- proses_data(datanya[,col])
-      
-      data_proses[[nama_kolom[col]]] <- list(dt=hasil_proses$dt, met=hasil_proses$met, adf=hasil_proses$adf)
-      
+      print('NAMAKOLOM:')
+      print(nama_kolom[col])
+      hasil <- proses_data(datanya[,col])
+      print(hasil)
+      data_proses[[nama_kolom[col]]] <- list(d.diff=hasil$d.diff, d.trans=hasil$d.trans)
+      print('============================')
     }
-    
+    print('-----------------------')
+    print(data_proses)
     return(data_proses)
   })
   
@@ -63,44 +65,6 @@ shinyServer(function(input, output) {
       choices = kolom,
       selected = kolom[2]
     )
-  })
-  
-  get_summary <- reactive({
-    dt <- data_sumber()
-    sr <- summary(dt)
-    # Membuat table summary yang baru
-    num_of_col = length(colnames(sr))
-    num_of_row = 7
-    tot_elm = num_of_row * num_of_col
-    new_sr <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
-    colnames(new_sr) <- colnames(sr)
-    
-    for (col in 1:num_of_col)
-    {
-      for (row in 1:num_of_row)
-      {
-        if (row == 7)
-        {
-          adf_test <- adf.test(dt[,col])
-          if (adf_test$alternative == "stationary")
-          {
-            new_sr[row,col] = paste("Stationer: Ya  ")
-          }
-          else
-          {
-            new_sr[row,col] == paste("Stationer: Tidak  ")
-          }
-        }
-        else
-        {
-          new_sr[row,col] = sr[row,col]
-        }
-        
-      }
-    }
-    tbl <- as.table(new_sr)
-    row.names(tbl) <- NULL
-    return(tbl)
   })
   
   identifikasi <- reactive({
@@ -121,10 +85,7 @@ shinyServer(function(input, output) {
     tbl["Lag Order",col] <- adf_test$parameter[[1]]
     tbl["Nilai P",col] <- adf_test$p.value[[1]]
     tbl["Kesimpulan",col] <- adf_test$alternative
-    #tbl["Dickey-Fuller",col] <- c(stat, param, p_val, is_sti)
-      
-    
-    
+
     return(as.table(tbl))
   })
   
@@ -176,73 +137,77 @@ shinyServer(function(input, output) {
   })
   
   output$asli_ts <- renderPlot({
-    if (length(data_sumber()) > 0)
-      dt <- data_sumber()
-    plot.ts(dt[,input$var_column], main = paste("Diagram Fit untuk ",input$var_column), ylab =
-              "value")
-  })
-  
-  output$asli_acf <- renderPlot({
-    if (length(data_sumber()) > 0)
-      dt <- data_sumber()
-    resid <- acf(dt[,input$var_column])
-    plot(resid, main = paste("ACF Residual untuk ",input$var_column))
-  })
-  
-  output$asli_pacf <- renderPlot({
-    if (length(data_sumber()) > 0)
-      dt <- data_sumber()
-    resid <- pacf(dt[,input$var_column],plot=FALSE)
-    plot(resid, main = paste("PACF Residual untuk ",input$var_column))
-  })
-  
-  output$identifikasi <- renderTable({
     if (length(data_sumber()) > 0){
-     anu <- ambil_data()
-    kolom <- anu[[input$var_column]]
-    # Membuat table summary yang baru
-    num_of_col = 1
-    num_of_row = 4
-    tot_elm = num_of_row * num_of_col
-    tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
-    
-    colnames(tbl) <- input$var_column
-    rownames(tbl) <-
-      c("Dickey-Fuller", "Lag Order", "Nilai P", "Kesimpulan")
-    
-    
-    tbl["Dickey-Fuller",1] <- kolom$adf$statistic[[1]]
-    tbl["Lag Order",1] <- kolom$adf$parameter[[1]]
-    tbl["Nilai P",1] <- kolom$adf$p.value[[1]]
-    tbl["Kesimpulan",1] <- kolom$met
-    tbl
+      dt <- data_sumber()
+      plot.ts(dt[,input$var_column], main = paste("Diagram Fit untuk ",input$var_column), ylab =
+                "value")
     }
   })
   
-  output$id_ts <- renderPlot({
-    if (length(data_sumber()) > 0)
-      anu <- ambil_data()
-    kolom <- anu[[input$var_column]]
-    dt <- kolom$dt
-    plot.ts(dt, main = paste("Plot untuk ",input$var_column), ylab =
-              "value")
+  output$asli_acf <- renderPlot({
+    if (length(data_sumber()) > 0){
+      dt <- data_sumber()
+      resid <- acf(dt[,input$var_column])
+      plot(resid, main = paste("ACF Residual untuk ",input$var_column))
+    }
   })
   
-  output$id_acf <- renderPlot({
-    if (length(data_sumber()) > 0)
-      anu <- ambil_data()
-    kolom <- anu[[input$var_column]]
-    dt <- kolom$dt
-    resid <- acf(dt)
-    plot(resid, main = paste("ACF Residual untuk ",input$var_column))
+  output$asli_pacf <- renderPlot({
+    if (length(data_sumber()) > 0){
+      dt <- data_sumber()
+      resid <- pacf(dt[,input$var_column],plot=FALSE)
+      plot(resid, main = paste("PACF Residual untuk ",input$var_column))
+    }
+      
   })
   
-  output$id_pacf <- renderPlot({
-    if (length(data_sumber()) > 0)
+  output$data_transformasi <- renderTable({
+    if (length(data_sumber()) > 0){
+      dt <- data_sumber()
       anu <- ambil_data()
-    kolom <- anu[[input$var_column]]
-    dt <- kolom$dt
-    resid <- pacf(dt,plot=FALSE)
-    plot(resid, main = paste("PACF Residual untuk ",input$var_column))
+      # Membuat table summary yang baru
+      
+      num_of_col = length(colnames(dt))
+      num_of_row = length(dt[,1])
+      tot_elm = num_of_row * num_of_col
+      tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
+      colnames(tbl) <- colnames(dt)
+      
+      for (col in 1:num_of_col ){
+        nama_kolom <- colnames(tbl)[col]
+        datanya <- anu[[col]]$d.trans
+        tbl[,col] <- datanya
+      }
+      
+      tbl
+    }
   })
+  
+  output$data_differencing <- renderTable({
+    if (length(data_sumber()) > 0){
+      dt <- data_sumber()
+      anu <- ambil_data()
+      # Membuat table summary yang baru
+      
+      num_of_col = length(colnames(dt))
+      num_of_row = length(dt[,1])
+      tot_elm = num_of_row * num_of_col
+      tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
+      colnames(tbl) <- colnames(dt)
+      
+      for (col in 1:num_of_col ){
+        nama_kolom <- colnames(tbl)[col]
+        datanya <- anu[[col]]$d.diff
+        ln <- length(datanya)
+        if (ln < num_of_row){
+          selisih <- num_of_row - ln
+          for (i in 1:selisih) datanya <- c(datanya, NA)
+        }
+        tbl[,col] <- datanya
+      }
+      
+      tbl
+    }
+  })
+  
 })
