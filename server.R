@@ -8,7 +8,7 @@ library(forecast)
 
 process_data <- function(dataset){
 	p.orig <- adf.test(dataset)$p.value
-	
+
 	# Transformasi
 	lambda <- BoxCox.lambda(dataset)
 	data.trans <- BoxCox(dataset, lambda)
@@ -21,7 +21,7 @@ process_data <- function(dataset){
 	#both
 	data.both <- diff(data.trans, lag=1, d=1)
 	p.both <- adf.test(data.both)$p.value
-	
+
 	if (p.orig < 0.1){
 		dt <- dataset
 		met <- 'orig'
@@ -52,13 +52,13 @@ shinyServer(function(input, output) {
 	nama_kolom <- colnames(datanya)
 	num_of_col <- length(nama_kolom)
 	data_proses <- list() # pake nama yang lebih jelalah
-	
+
 	for(col in 1:num_of_col){
            hasil_proses <- proses_data(datanya[,col])
 	   data_proses(nama_kolom[col]=hasil_proses)
         }
 	return(data_proses)
-  }) 
+  })
 
   output$pilih_kolom <- renderUI({
     kolom <- colnames(data_sumber())
@@ -69,7 +69,7 @@ shinyServer(function(input, output) {
       selected = kolom[2]
     )
   })
-  
+
   get_summary <- reactive({
     dt <- data_sumber()
     sr <- summary(dt)
@@ -79,18 +79,18 @@ shinyServer(function(input, output) {
     tot_elm = num_of_row * num_of_col
     new_sr <- array(1:tot_elm, dim=c(num_of_row, num_of_col))
     colnames(new_sr) <- colnames(sr)
-    
-    for(col in 1: num_of_col) 
+
+    for(col in 1: num_of_col)
     {
       for(row in 1:num_of_row)
       {
-        if (row == 7) 
+        if (row == 7)
         {
           adf_test <- adf.test(dt[,col])
           if (adf_test$alternative == "stationary")
           {
             new_sr[row,col] = paste("Stationer: Ya  ")
-          } 
+          }
           else
           {
             new_sr[row,col] == paste("Stationer: Tidak  ")
@@ -100,26 +100,26 @@ shinyServer(function(input, output) {
         {
           new_sr[row,col] = sr[row,col]
         }
-        
-      } 
+
+      }
     }
     tbl <- as.table(new_sr)
     row.names(tbl) <- NULL
     return(tbl)
   })
-  
+
   identifikasi <- reactive({
     dt <- data_sumber()
-    
+
     # Membuat table summary yang baru
     num_of_col = length(colnames(dt))
     num_of_row = 4
     tot_elm = num_of_row * num_of_col
     tbl <- array(1:tot_elm, dim=c(num_of_row, num_of_col))
-    
+
     colnames(tbl) <- colnames(dt)
     rownames(tbl) <- c("Dickey-Fuller", "Lag Order", "Nilai P", "Kesimpulan")
-    for(col in 1: num_of_col) 
+    for(col in 1: num_of_col)
     {
       adf_test <- adf.test(dt[,col])
       tbl["Dickey-Fuller",col] <- adf_test$statistic[[1]]
@@ -127,12 +127,12 @@ shinyServer(function(input, output) {
       tbl["Nilai P",col] <- adf_test$p.value[[1]]
       tbl["Kesimpulan",col] <- adf_test$alternative
       #tbl["Dickey-Fuller",col] <- c(stat, param, p_val, is_sti)
-      
+
     }
-    
+
     return(as.table(tbl))
   })
-  
+
   var_process <- reactive({
     datanya <- data_sumber()
     if (length(datanya) > 0)
@@ -141,81 +141,75 @@ shinyServer(function(input, output) {
     else
       vr <- NULL
   })
-  
+
   var_analysis <- reactive({
     vselect <- var_process()
     p_val <- vselect$selection[['SC(n)']]
     p1ct <- VAR(data_sumber(), p = p_val)
     return(p1ct)
   })
-  
+
   var_residual <- reactive({
     va <- var_analysis()
     rds <- residuals(va)
     return(rds)
   })
-  
+
   arch_test <- reactive({
     va <- var_analysis()
     arch <- arch.test(va, lags.multi = 5)
   })
-  
+
   stable_test <- reactive({
     return(stability(var_analysis()))
   })
-  
+
   output$var_select <- renderTable({
     vselect <- var_process()
     if (!is.null(vselect))
       vselect$criteria
   })
-  
+
   output$data_table <- renderTable({
     if (length(data_sumber()) > 0)
       data_sumber()
   })
-  
+
   output$data_summary <- renderTable({
     if (length(data_sumber()) > 0)
       get_summary()
   })
-  
+
   output$var_fit <- renderPlot({
-    vselect <- var_process()
-    if (!is.null(vselect)) {
-      va <- var_analysis()
-      resids <- var_residual()
-      plot.ts(
-        resids[,input$var_column], main = paste("Diagram Fit untuk ",input$var_column), ylab =
-          "value"
-      )
-    }
+	if (length(data_sumber()) > 0)
+		dt <- data_sumber()
+		plot.ts(
+			dt[,input$var_column], main = paste("Diagram Fit untuk ",input$var_column), ylab =
+				"value"
+		)
   })
-  
+
   output$acf_residual <- renderPlot({
-    vselect <- var_process()
-    if (!is.null(vselect)) {
-      va <- var_analysis()
-      resids <- var_residual()
-      acf(
-        resids[,input$var_column], main = paste("ACF Residual untuk ",input$var_column), lag.max =
-          12
-      )
-    }
+		if (length(data_sumber()) > 0)
+			dt <- data_sumber()
+			acf(dt[,input$var_column])
   })
-  
+
   output$pacf_residual <- renderPlot({
-    vselect <- var_process()
-    if (!is.null(vselect)) {
-      va <- var_analysis()
-      resids <- var_residual()
-      pacf(
-        resids[,input$var_column], main = paste("PACF Residual untuk ",input$var_column), lag.max =
-          12
-      )
-    }
+		if (length(data_sumber()) > 0)
+			dt <- data_sumber()
+			pacf(dt[,input$var_column])
+    #vselect <- var_process()
+    #if (!is.null(vselect)) {
+    #  va <- var_analysis()
+    #  resids <- var_residual()
+    #  pacf(
+    #    resids[,input$var_column], main = paste("PACF Residual untuk ",input$var_column), lag.max =
+    #      12
+    #  )
+    #}
   })
-  
+
   output$identifikasi <- renderTable({
     if (length(data_sumber()) > 0)
       identifikasi()
