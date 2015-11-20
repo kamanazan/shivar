@@ -25,7 +25,7 @@ proses_data <- function(dataset) {
     
   }
   
-  return(list(d.trans = data.trans, d.diff = data.diff))
+  return(list(d.trans = data.trans, d.diff = data.diff, adf.trans=adf_trans, adf.diff=adf_diff))
 }
 
 shinyServer(function(input, output) {
@@ -46,8 +46,9 @@ shinyServer(function(input, output) {
     
     for (col in 1:num_of_col) {
       hasil <- proses_data(datanya[,col])
+      
       data_proses[[nama_kolom[col]]] <-
-        list(d.diff = hasil$d.diff, d.trans = hasil$d.trans)
+        list(d.diff = hasil$d.diff, d.trans = hasil$d.trans, adf.trans=hasil$adf.trans, adf.diff=hasil$adf.diff)
       
     }
     
@@ -64,26 +65,67 @@ shinyServer(function(input, output) {
     )
   })
   
-  identifikasi <- reactive({
-    dt <- ambil_data()
-    kolom <- dt[,input$var]
+  ringkasan_adf <- reactive({
+    anu <- ambil_data()
+    kolom <- anu[[input$var_column]]
+    dt <- kolom$adf.trans
+    df <- kolom$adf.diff
     # Membuat table summary yang baru
-    num_of_col = 1
-    num_of_row = 4
+    num_of_col = 2
+    num_of_row = 3
     tot_elm = num_of_row * num_of_col
     tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
     
-    colnames(tbl) <- colnames(dt)
+    colnames(tbl) <- c('Transformasi', 'Differencing')
     rownames(tbl) <-
-      c("Dickey-Fuller", "Lag Order", "Nilai P", "Kesimpulan")
+      c("Dickey-Fuller", "Lag Order", "Nilai P")
     
-    adf_test <- adf.test(dt[,col])
-    tbl["Dickey-Fuller",col] <- dt$statistic[[1]]
-    tbl["Lag Order",col] <- adf_test$parameter[[1]]
-    tbl["Nilai P",col] <- adf_test$p.value[[1]]
-    tbl["Kesimpulan",col] <- adf_test$alternative
+    tbl[1,1] <- dt$statistic[[1]]
+    tbl[2,1] <- dt$parameter[[1]]
+    tbl[3,1] <- dt$p.value[[1]]
+    tbl[1,2] <- df$statistic[[1]]
+    tbl[2,2] <- df$parameter[[1]]
+    tbl[3,2] <- df$p.value[[1]]
     
     return(as.table(tbl))
+  })
+  
+  get_summary <- reactive({
+    dt <- data_sumber()
+    sr <- summary(dt)
+    # Membuat table summary yang baru
+    num_of_col = length(colnames(sr))
+    num_of_row = 7
+    tot_elm = num_of_row * num_of_col
+    new_sr <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
+    colnames(new_sr) <- colnames(sr)
+    
+    for (col in 1:num_of_col)
+    {
+      for (row in 1:num_of_row)
+      {
+        if (row == 7)
+        {
+          adf_test <- adf.test(dt[,col])
+          if (adf_test$p.value < 0.05)
+          {
+            new_sr[row,col] = paste("Stationer: Ya  ")
+          }
+          else
+          {
+            new_sr[row,col] == paste("Stationer: Tidak  ")
+          }
+        }
+        else
+        {
+          new_sr[row,col] = sr[row,col]
+        }
+        
+      }
+    }
+    tbl <- as.table(new_sr)
+    row.names(tbl) <- NULL
+    return(tbl)
   })
   
   var_process <- reactive({
@@ -156,6 +198,11 @@ shinyServer(function(input, output) {
       plot(resid, main = paste("PACF Residual untuk ",input$var_column))
     }
     
+  })
+  
+  output$hasil_adf <- renderTable({
+    if (length(data_sumber()) > 0)
+      ringkasan_adf()
   })
   
   output$data_transformasi <- renderTable({
