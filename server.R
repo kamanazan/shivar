@@ -128,7 +128,7 @@ shinyServer(function(input, output) {
         if (row == 7)
         {
           adf_test <- adf.test(dt[,col])
-          print(adf_test$p.value)
+
           if (adf_test$p.value[[1]] < 0.05)
           {
             new_sr[row,col] = paste("Stationer: Ya  ")
