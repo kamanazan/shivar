@@ -80,7 +80,7 @@ shinyServer(function(input, output) {
     kolom <- colnames(data_sumber())
     selectInput(
       "var_column",
-      label = "Kolom yang diteliti",
+      label = "Kolom yang diamati",
       choices = kolom,
       selected = kolom[2]
     )

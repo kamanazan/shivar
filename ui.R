@@ -49,6 +49,12 @@ shinyUI(fluidPage(
     mainPanel(
       tabsetPanel(
         position = c("above"),
+        tabPanel(strong("Data"),
+                 tabsetPanel(
+                   tabPanel("Data upload", tableOutput("data_table")),
+                   tabPanel("Data summary", tableOutput("data_summary"))
+                 )),
+        
         tabPanel(
           strong("Plots"),
           br(),
@@ -58,18 +64,6 @@ shinyUI(fluidPage(
           br(),
           plotOutput("asli_pacf")
         ),
-        
-        tabPanel(strong("Summary"),
-                 br(),
-                 tableOutput("var_select"),
-                 br(),
-                 br()),
-        
-        tabPanel(strong("Data"),
-                 tabsetPanel(
-                   tabPanel("Data upload", tableOutput("data_table")),
-                   tabPanel("Data summary", tableOutput("data_summary"))
-                 )),
         
         tabPanel(
           strong("Identifikasi"),
