@@ -16,16 +16,36 @@ proses_data <- function(dataset) {
   p.trans <- adf_trans$p.value
   
   # Differencing
+  diffd <- list()
+  
   p.diff = 1
   data.diff = data.trans
-  while (p.diff > 0.05) {
+  for (i in 1:3) {
     data.diff <- diff(data.diff, lag = 1, d = 1)
-    adf_diff <- adf.test(data.diff)
-    p.diff <- adf_diff$p.value
+    diffd[[i]] <- data.diff
+    data.diff <- diffd[[i]]
     
   }
+  adf_diff1 <- adf.test(diffd[[2]])
+  p.diff1 <- adf_diff1$p.value
+  adf_diff2 <- adf.test(diffd[[2]])
+  p.diff2 <- adf_diff2$p.value
+  adf_diff3 <- adf.test(diffd[[3]])
+  p.diff3 <- adf_diff3$p.value
   
-  return(list(d.trans = data.trans, d.diff = data.diff, adf.trans=adf_trans, adf.diff=adf_diff))
+  if (p.diff1 < 0.05){
+    adf_diff <- adf_diff1
+    res.diff <- diffd[[1]]
+  }else if (p.diff2 < 0.05){
+    adf_diff <- adf_diff2
+    res.diff <- diffd[[2]]
+  }else if (p.diff3 < 0.05){
+    adf_diff <- adf_diff3
+    res.diff <- diffd[[3]]
+  }
+  
+  return(list(d.trans = data.trans, d.diff = res.diff, adf.trans=adf_trans, adf.diff=adf_diff,
+              df1=diffd[[1]], df2=diffd[[2]], df3=diffd[[3]]))
 }
 
 shinyServer(function(input, output) {
@@ -48,7 +68,8 @@ shinyServer(function(input, output) {
       hasil <- proses_data(datanya[,col])
       
       data_proses[[nama_kolom[col]]] <-
-        list(d.diff = hasil$d.diff, d.trans = hasil$d.trans, adf.trans=hasil$adf.trans, adf.diff=hasil$adf.diff)
+        list(d.diff = hasil$d.diff, d.trans = hasil$d.trans, adf.trans=hasil$adf.trans, 
+             adf.diff=hasil$adf.diff, df1=hasil$df1, df2=hasil$df2, df3=hasil$df3)
       
     }
     
@@ -228,27 +249,21 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$data_differencing <- renderTable({
+  output$data_differencing1 <- renderTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
       # Membuat table summary yang baru
       
       num_of_col = length(colnames(dt))
-      num_of_row = length(dt[,1])
+      num_of_row = length(anu[[1]]$df1)
       tot_elm = num_of_row * num_of_col
       tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
       colnames(tbl) <- colnames(dt)
       
       for (col in 1:num_of_col) {
         nama_kolom <- colnames(tbl)[col]
-        datanya <- anu[[col]]$d.diff
-        ln <- length(datanya)
-        if (ln < num_of_row) {
-          selisih <- num_of_row - ln
-          for (i in 1:selisih)
-            datanya <- c(datanya, NA)
-        }
+        datanya <- anu[[col]]$df1
         tbl[,col] <- datanya
       }
       
@@ -256,6 +271,49 @@ shinyServer(function(input, output) {
     }
   })
   
+  output$data_differencing2 <- renderTable({
+    if (length(data_sumber()) > 0) {
+      dt <- data_sumber()
+      anu <- ambil_data()
+      # Membuat table summary yang baru
+      
+      num_of_col = length(colnames(dt))
+      num_of_row = length(anu[[1]]$df2)
+      tot_elm = num_of_row * num_of_col
+      tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
+      colnames(tbl) <- colnames(dt)
+      
+      for (col in 1:num_of_col) {
+        nama_kolom <- colnames(tbl)[col]
+        datanya <- anu[[col]]$df2
+        tbl[,col] <- datanya
+      }
+      
+      tbl
+    }
+  })
+  
+  output$data_differencing3 <- renderTable({
+    if (length(data_sumber()) > 0) {
+      dt <- data_sumber()
+      anu <- ambil_data()
+      # Membuat table summary yang baru
+      
+      num_of_col = length(colnames(dt))
+      num_of_row = length(anu[[1]]$df3)
+      tot_elm = num_of_row * num_of_col
+      tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
+      colnames(tbl) <- colnames(dt)
+      
+      for (col in 1:num_of_col) {
+        nama_kolom <- colnames(tbl)[col]
+        datanya <- anu[[col]]$df3
+        tbl[,col] <- datanya
+      }
+      
+      tbl
+    }
+  })
   output$id_ts <- renderPlot({
     if (length(data_sumber()) > 0) {
       anu <- ambil_data()

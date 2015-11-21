@@ -75,7 +75,9 @@ shinyUI(fluidPage(
           strong("Identifikasi"),
           tabsetPanel(
             tabPanel("Data Hasil Transformasi", tableOutput("data_transformasi")),
-            tabPanel("Data Hasil Differencing", tableOutput("data_differencing")),
+            tabPanel("Data Hasil Differencing 1", tableOutput("data_differencing1")),
+            tabPanel("Data Hasil Differencing 2", tableOutput("data_differencing2")),
+            tabPanel("Data Hasil Differencing 3", tableOutput("data_differencing3")),
             tabPanel("Hasil Test ADF", 
                      tableOutput("hasil_adf"),
                      plotOutput('id_ts'),
