@@ -32,7 +32,7 @@ shinyUI(fluidPage(
       sliderInput(
         "lag_max", h4("Interval Lag"),
         min = 1,
-        max = 10,
+        max = 5,
         value = 1
       ),
       
@@ -77,6 +77,15 @@ shinyUI(fluidPage(
                      plotOutput('id_ts'),
                      plotOutput('id_acf'),
                      plotOutput('id_pacf'))
+          )),
+        
+        tabPanel(
+          strong("Estimasi"),
+          tabsetPanel(
+            tabPanel("Constant", verbatimTextOutput("estimasi_const")),
+            tabPanel("Trend", verbatimTextOutput("estimasi_trend")),
+            tabPanel("Both", verbatimTextOutput("estimasi_both")),
+            tabPanel("None", verbatimTextOutput("estimasi_none"))
           ))
         
       )

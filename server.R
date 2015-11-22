@@ -7,7 +7,8 @@ library(forecast)
 #data_sumber <- read.csv("canada.csv")
 
 proses_data <- function(dataset) {
-  p.orig <- adf.test(dataset)$p.value
+  adf_asli <- adf.test(dataset)
+  p.orig <- adf_asli$p.value
   
   # Transformasi
   lambda <- BoxCox.lambda(dataset)
@@ -44,7 +45,8 @@ proses_data <- function(dataset) {
     res.diff <- diffd[[3]]
   }
   
-  return(list(d.trans = data.trans, d.diff = res.diff, adf.trans=adf_trans, adf.diff=adf_diff,
+  return(list(d.trans = data.trans, d.diff = res.diff, 
+              adf.trans=adf_trans, adf.diff=adf_diff, adf.asli=adf_asli,
               df1=diffd[[1]], df2=diffd[[2]], df3=diffd[[3]]))
 }
 
@@ -68,8 +70,9 @@ shinyServer(function(input, output) {
       hasil <- proses_data(datanya[,col])
       
       data_proses[[nama_kolom[col]]] <-
-        list(d.diff = hasil$d.diff, d.trans = hasil$d.trans, adf.trans=hasil$adf.trans, 
-             adf.diff=hasil$adf.diff, df1=hasil$df1, df2=hasil$df2, df3=hasil$df3)
+        list(d.diff = hasil$d.diff, d.trans = hasil$d.trans, 
+             adf.trans=hasil$adf.trans, adf.diff=hasil$adf.diff, adf.asli=hasil$adf.asli,
+             df1=hasil$df1, df2=hasil$df2, df3=hasil$df3)
       
     }
     
@@ -148,6 +151,47 @@ shinyServer(function(input, output) {
     tbl <- as.table(new_sr)
     row.names(tbl) <- NULL
     return(tbl)
+  })
+  
+  get_estimation_data <- reactive({
+    
+    dt <- data_sumber()
+    anu <- ambil_data()
+    # Membuat table summary yang baru
+    
+    num_of_col = length(colnames(dt))
+    num_of_row = length(dt[,1])
+    tot_elm = num_of_row * num_of_col
+    tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
+    colnames(tbl) <- colnames(dt)
+    
+    for (col in 1:num_of_col) {
+      nama_kolom <- colnames(tbl)[col]
+      p_asli <- anu[[col]]$adf.asli$p.value
+      p_diff <- anu[[col]]$adf.diff$p.value
+      p_trans <- anu[[col]]$adf.trans$p.value
+      
+      if (p_asli < 0.05){
+        datanya <- dt[[col]]
+      }else if(p_trans < 0.05){
+        datanya <- anu[[col]]$d.trans
+      }else{
+        datanya <- anu[[col]]$d.diff
+      }
+      
+      ln <- length(datanya)
+      if (ln < num_of_row){
+        selisih <- num_of_row - ln
+        for (i in 1:selisih)
+          datanya <- c(datanya, NA)
+      }
+      tbl[,col] <- datanya
+    }
+    # Jadi gini karena data yang dipakai adalah data yang terakhir stationer
+    # ada kemungkinan jumlah data setiap kolom beda-beda, jadinya jumlah data
+    # disamaratakan berdasarkan hasil differncing 3
+    row_used <- num_of_row - 3
+    return(tbl[1:row_used,])
   })
   
   var_process <- reactive({
@@ -365,6 +409,34 @@ shinyServer(function(input, output) {
         df, main = paste("PACF untuk ",input$var_column, "setelah differencing"), ylab =
           "value"
       )
+    }
+  })
+  
+  output$estimasi_const <- renderPrint({
+    if (length(data_sumber()) > 0) {
+      dt <- get_estimation_data()
+      VAR(dt,p=input$lag_max,type='const')
+    }
+  })
+  
+  output$estimasi_trend <- renderPrint({
+    if (length(data_sumber()) > 0) {
+      dt <- get_estimation_data()
+      VAR(dt,p=input$lag_max,type='trend')
+    }
+  })
+  
+  output$estimasi_both <- renderPrint({
+    if (length(data_sumber()) > 0) {
+      dt <- get_estimation_data()
+      VAR(dt,p=input$lag_max,type='both')
+    }
+  })
+  
+  output$estimasi_none <- renderPrint({
+    if (length(data_sumber()) > 0) {
+      dt <- get_estimation_data()
+      VAR(dt,p=input$lag_max,type='none')
     }
   })
   
