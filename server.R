@@ -53,7 +53,10 @@ proses_data <- function(dataset) {
 shinyServer(function(input, output) {
   data_sumber <- reactive({
     if (length(input$sumber_data$name) > 0) {
-      dt <- read.csv(input$sumber_data$datapath)
+      mn <- read.csv(input$sumber_data$datapath)
+      ln <- length(colnames(mn))
+      # asumsi kolom pertama adalah t, jadi ga usah dianalisis
+      dt <- mn[,2:ln]
     }
     else
       dt <- list()
@@ -225,18 +228,18 @@ shinyServer(function(input, output) {
     return(stability(var_analysis()))
   })
   
-  output$var_select <- renderTable({
+  output$var_select <- renderDataTable({
     vselect <- var_process()
     if (!is.null(vselect))
       vselect$criteria
   })
   
-  output$data_table <- renderTable({
+  output$data_table <- renderDataTable({
     if (length(data_sumber()) > 0)
       data_sumber()
   })
   
-  output$data_summary <- renderTable({
+  output$data_summary <- renderDataTable({
     if (length(data_sumber()) > 0)
       get_summary()
   })
@@ -266,12 +269,12 @@ shinyServer(function(input, output) {
     
   })
   
-  output$hasil_adf <- renderTable({
+  output$hasil_adf <- renderDataTable({
     if (length(data_sumber()) > 0)
       ringkasan_adf()
   })
   
-  output$data_transformasi <- renderTable({
+  output$data_transformasi <- renderDataTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
@@ -293,7 +296,7 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$data_differencing1 <- renderTable({
+  output$data_differencing1 <- renderDataTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
@@ -315,7 +318,7 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$data_differencing2 <- renderTable({
+  output$data_differencing2 <- renderDataTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
@@ -337,7 +340,7 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$data_differencing3 <- renderTable({
+  output$data_differencing3 <- renderDataTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
