@@ -53,10 +53,7 @@ proses_data <- function(dataset) {
 shinyServer(function(input, output) {
   data_sumber <- reactive({
     if (length(input$sumber_data$name) > 0) {
-      mn <- read.csv(input$sumber_data$datapath)
-      ln <- length(colnames(mn))
-      # asumsi kolom pertama adalah t, jadi ga usah dianalisis
-      dt <- mn[,2:ln]
+      dt <- read.csv(input$sumber_data$datapath)
     }
     else
       dt <- list()
@@ -68,8 +65,9 @@ shinyServer(function(input, output) {
     nama_kolom <- colnames(datanya)
     num_of_col <- length(nama_kolom)
     data_proses <- vector('list')
-    
-    for (col in 1:num_of_col) {
+    # Kolom pertama dianggap variable t (tidak dianalisis)
+    # TODO: buat pilihan variable yang tidak akan dianalisis
+    for (col in 2:num_of_col) {
       hasil <- proses_data(datanya[,col])
       
       data_proses[[nama_kolom[col]]] <-
@@ -83,13 +81,15 @@ shinyServer(function(input, output) {
   })
   
   output$pilih_kolom <- renderUI({
-    kolom <- colnames(data_sumber())
-    selectInput(
-      "var_column",
-      label = "Kolom yang diamati",
-      choices = kolom,
-      selected = kolom[2]
-    )
+    if (length(data_sumber()) > 0){
+      kolom <- names(ambil_data())
+      selectInput(
+        "var_column",
+        label = "Kolom yang diamati",
+        choices = kolom,
+        selected = kolom[2]
+      )
+    }
   })
   
   ringkasan_adf <- reactive({
@@ -162,11 +162,11 @@ shinyServer(function(input, output) {
     anu <- ambil_data()
     # Membuat table summary yang baru
     
-    num_of_col = length(colnames(dt))
+    num_of_col = length(names(anu))
     num_of_row = length(dt[,1])
     tot_elm = num_of_row * num_of_col
     tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
-    colnames(tbl) <- colnames(dt)
+    colnames(tbl) <- names(anu)
     
     for (col in 1:num_of_col) {
       nama_kolom <- colnames(tbl)[col]
@@ -239,7 +239,7 @@ shinyServer(function(input, output) {
       data_sumber()
   })
   
-  output$data_summary <- renderDataTable({
+  output$data_summary <- renderTable({
     if (length(data_sumber()) > 0)
       get_summary()
   })
@@ -269,10 +269,7 @@ shinyServer(function(input, output) {
     
   })
   
-  output$hasil_adf <- renderDataTable({
-    if (length(data_sumber()) > 0)
-      ringkasan_adf()
-  })
+  
   
   output$data_transformasi <- renderDataTable({
     if (length(data_sumber()) > 0) {
@@ -280,11 +277,11 @@ shinyServer(function(input, output) {
       anu <- ambil_data()
       # Membuat table summary yang baru
       
-      num_of_col = length(colnames(dt))
+      num_of_col = length(names(anu))
       num_of_row = length(dt[,1])
       tot_elm = num_of_row * num_of_col
       tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
-      colnames(tbl) <- colnames(dt)
+      colnames(tbl) <- names(anu)
       
       for (col in 1:num_of_col) {
         nama_kolom <- colnames(tbl)[col]
@@ -302,11 +299,11 @@ shinyServer(function(input, output) {
       anu <- ambil_data()
       # Membuat table summary yang baru
       
-      num_of_col = length(colnames(dt))
+      num_of_col = length(names(anu))
       num_of_row = length(anu[[1]]$df1)
       tot_elm = num_of_row * num_of_col
       tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
-      colnames(tbl) <- colnames(dt)
+      colnames(tbl) <- names(anu)
       
       for (col in 1:num_of_col) {
         nama_kolom <- colnames(tbl)[col]
@@ -324,11 +321,11 @@ shinyServer(function(input, output) {
       anu <- ambil_data()
       # Membuat table summary yang baru
       
-      num_of_col = length(colnames(dt))
+      num_of_col = length(names(anu))
       num_of_row = length(anu[[1]]$df2)
       tot_elm = num_of_row * num_of_col
       tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
-      colnames(tbl) <- colnames(dt)
+      colnames(tbl) <- names(anu)
       
       for (col in 1:num_of_col) {
         nama_kolom <- colnames(tbl)[col]
@@ -346,11 +343,11 @@ shinyServer(function(input, output) {
       anu <- ambil_data()
       # Membuat table summary yang baru
       
-      num_of_col = length(colnames(dt))
+      num_of_col = length(names(anu))
       num_of_row = length(anu[[1]]$df3)
       tot_elm = num_of_row * num_of_col
       tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
-      colnames(tbl) <- colnames(dt)
+      colnames(tbl) <- names(anu)
       
       for (col in 1:num_of_col) {
         nama_kolom <- colnames(tbl)[col]
@@ -361,6 +358,12 @@ shinyServer(function(input, output) {
       tbl
     }
   })
+  
+  output$hasil_adf <- renderTable({
+    if (length(data_sumber()) > 0)
+      ringkasan_adf()
+  })
+  
   output$id_ts <- renderPlot({
     if (length(data_sumber()) > 0) {
       anu <- ambil_data()

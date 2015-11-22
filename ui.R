@@ -40,7 +40,7 @@ shinyUI(fluidPage(
         tabPanel(strong("Data"),
                  tabsetPanel(
                    tabPanel("Data upload", dataTableOutput("data_table")),
-                   tabPanel("Data summary", dataTableOutput("data_summary"))
+                   tabPanel("Data summary", tableOutput("data_summary"))
                  )),
         
         tabPanel(
