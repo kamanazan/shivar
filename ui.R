@@ -29,18 +29,6 @@ shinyUI(fluidPage(
       
       fileInput("sumber_data", label = "pilih data"),
       
-      sliderInput(
-        "lag_max", h4("Interval Lag"),
-        min = 1,
-        max = 5,
-        value = 1
-      ),
-      
-      # Pemilihan variable yang akan diteliti
-      # TODO:
-      #1. buat choices dinamis tergantung jenis data
-      #   yang digunakan
-      #2. Opsi 'semua' untuk menampilkan grafik semua kolom
       uiOutput('pilih_kolom'),
       
       width = 3
@@ -81,12 +69,24 @@ shinyUI(fluidPage(
         
         tabPanel(
           strong("Estimasi"),
-          tabsetPanel(
-            tabPanel("Constant", verbatimTextOutput("estimasi_const")),
-            tabPanel("Trend", verbatimTextOutput("estimasi_trend")),
-            tabPanel("Both", verbatimTextOutput("estimasi_both")),
-            tabPanel("None", verbatimTextOutput("estimasi_none"))
-          ))
+          fluidRow(
+            column(4,
+                   selectInput(
+                     "estimasi_type",
+                     label = "Tipe",
+                     choices = c('Constant' = 'const', 'Trend' = 'trend', 'Both' = 'both', 'None' = 'none'),
+                     selected = 'const'
+                   )),
+            column(4,
+                   sliderInput(
+                     "estimasi_p.val", h4("Nilai P"),
+                     min = 1,
+                     max = 5,
+                     value = 1
+                   ))
+          ),
+          verbatimTextOutput("estimasi_hasil")
+        )
         
       )
     )

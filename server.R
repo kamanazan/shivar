@@ -415,31 +415,10 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$estimasi_const <- renderPrint({
+  output$estimasi_hasil <- renderPrint({
     if (length(data_sumber()) > 0) {
       dt <- get_estimation_data()
-      VAR(dt,p=input$lag_max,type='const')
-    }
-  })
-  
-  output$estimasi_trend <- renderPrint({
-    if (length(data_sumber()) > 0) {
-      dt <- get_estimation_data()
-      VAR(dt,p=input$lag_max,type='trend')
-    }
-  })
-  
-  output$estimasi_both <- renderPrint({
-    if (length(data_sumber()) > 0) {
-      dt <- get_estimation_data()
-      VAR(dt,p=input$lag_max,type='both')
-    }
-  })
-  
-  output$estimasi_none <- renderPrint({
-    if (length(data_sumber()) > 0) {
-      dt <- get_estimation_data()
-      VAR(dt,p=input$lag_max,type='none')
+      VAR(dt,p=input$estimasi_p.val,type=input$estimasi_type)
     }
   })
   
