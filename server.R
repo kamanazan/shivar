@@ -203,7 +203,7 @@ shinyServer(function(input, output) {
     return(va)
   })
   
-  create_summary <- reactive({
+  var_summary <- reactive({
     va <- var_analysis()
     va_res <- va$varresult
     va_summ <- summary(va)$varresult
@@ -228,11 +228,11 @@ shinyServer(function(input, output) {
         nilai_error <- coef_summary[bar, "Std. Error"]
         nilai_pt <- coef_summary[bar, "Pr(>|t|)"]
         
-        tbl[bar,kol] <- c(nilai_analisis, nilai_error, nilai_pt)
+        tbl[bar,kol] <- paste(nilai_analisis, nilai_error, nilai_pt)
       }
     }
     
-    return(tbl)
+    return(as.table(tbl))
   })
   
   arch_test <- reactive({
@@ -437,6 +437,12 @@ shinyServer(function(input, output) {
   output$estimasi_hasil <- renderPrint({
     if (length(data_sumber()) > 0) {
       var_analysis()
+    }
+  })
+  
+  output$estimasi_kesimpulan <- renderTable({
+    if (length(data_sumber()) > 0) {
+      var_summary()
     }
   })
   

@@ -69,23 +69,31 @@ shinyUI(fluidPage(
         
         tabPanel(
           strong("Estimasi"),
-          fluidRow(
-            column(4,
-                   selectInput(
-                     "estimasi_type",
-                     label = "Tipe",
-                     choices = c('Constant' = 'const', 'Trend' = 'trend', 'Both' = 'both', 'None' = 'none'),
-                     selected = 'const'
-                   )),
-            column(4,
-                   sliderInput(
-                     "estimasi_p.val", h4("Nilai P"),
-                     min = 1,
-                     max = 5,
-                     value = 1
-                   ))
-          ),
-          verbatimTextOutput("estimasi_hasil")
+          tabsetPanel(
+            tabPanel("Analisis VAR",
+                     fluidRow(
+                       column(4,
+                              selectInput(
+                                "estimasi_type",
+                                label = "Tipe",
+                                choices = c('Constant' = 'const', 'Trend' = 'trend', 'Both' = 'both', 'None' = 'none'),
+                                selected = 'const'
+                       )),
+                       column(4,
+                              sliderInput(
+                                "estimasi_p.val", h4("Nilai P"),
+                                min = 1,
+                                max = 5,
+                                value = 1
+                      ))
+                    ),
+                    verbatimTextOutput("estimasi_hasil")
+            ),
+            tabPanel("Summary",
+                     tableOutput('estimasi_kesimpulan')
+            )
+          )
+          
         )
         
       )
