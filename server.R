@@ -197,26 +197,42 @@ shinyServer(function(input, output) {
     return(tbl[1:row_used,])
   })
   
-  var_process <- reactive({
-    datanya <- data_sumber()
-    if (length(datanya) > 0)
-      vr <-
-        VARselect(data_sumber(),lag.max = input$lag_max)
-    else
-      vr <- NULL
-  })
-  
   var_analysis <- reactive({
-    vselect <- var_process()
-    p_val <- vselect$selection[['SC(n)']]
-    p1ct <- VAR(data_sumber(), p = p_val)
-    return(p1ct)
+    dt <- get_estimation_data()
+    va <- VAR(dt,p=input$estimasi_p.val,type=input$estimasi_type)
+    return(va)
   })
   
-  var_residual <- reactive({
+  create_summary <- reactive({
     va <- var_analysis()
-    rds <- residuals(va)
-    return(rds)
+    va_res <- va$varresult
+    va_summ <- summary(va)$varresult
+    
+    #ambil sample jumlah kolom dan jumlah baris
+    nama_kolom <- names(va_res)
+    nama_baris <- names(va_res[[1]]$coefficients)
+    
+    #membuat tabel
+    num_of_col = length(nama_kolom)
+    num_of_row = length(nama_baris)
+    tot_elm = num_of_row * num_of_col
+    tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
+    colnames(tbl) <- nama_kolom
+    rownames(tbl) <- nama_baris
+    
+    for(kol in nama_kolom){
+      coef_var <- va_res[[kol]]$coefficients
+      coef_summary <- va_summ[[kol]]$coefficients
+      for(bar in nama_baris){
+        nilai_analisis <- coef_var[[bar]]
+        nilai_error <- coef_summary[bar, "Std. Error"]
+        nilai_pt <- coef_summary[bar, "Pr(>|t|)"]
+        
+        tbl[bar,kol] <- c(nilai_analisis, nilai_error, nilai_pt)
+      }
+    }
+    
+    return(tbl)
   })
   
   arch_test <- reactive({
@@ -420,8 +436,7 @@ shinyServer(function(input, output) {
   
   output$estimasi_hasil <- renderPrint({
     if (length(data_sumber()) > 0) {
-      dt <- get_estimation_data()
-      VAR(dt,p=input$estimasi_p.val,type=input$estimasi_type)
+      var_analysis()
     }
   })
   
