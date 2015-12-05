@@ -39,7 +39,7 @@ shinyUI(fluidPage(
         position = c("above"),
         tabPanel(strong("Data"),
                  tabsetPanel(
-                   tabPanel("Data upload", dataTableOutput("data_table")),
+                   tabPanel("Data upload", DT::dataTableOutput("data_table")),
                    tabPanel("Data summary", tableOutput("data_summary"))
                  )),
         
@@ -56,10 +56,10 @@ shinyUI(fluidPage(
         tabPanel(
           strong("Identifikasi"),
           tabsetPanel(
-            tabPanel("Data Hasil Transformasi", dataTableOutput("data_transformasi")),
-            tabPanel("Data Hasil Differencing 1", dataTableOutput("data_differencing1")),
-            tabPanel("Data Hasil Differencing 2", dataTableOutput("data_differencing2")),
-            tabPanel("Data Hasil Differencing 3", dataTableOutput("data_differencing3")),
+            tabPanel("Data Hasil Transformasi", DT::dataTableOutput("data_transformasi")),
+            tabPanel("Data Hasil Differencing 1", DT::dataTableOutput("data_differencing1")),
+            tabPanel("Data Hasil Differencing 2", DT::dataTableOutput("data_differencing2")),
+            tabPanel("Data Hasil Differencing 3", DT::dataTableOutput("data_differencing3")),
             tabPanel("Hasil Test ADF", 
                      tableOutput("hasil_adf"),
                      plotOutput('id_ts'),
@@ -90,7 +90,7 @@ shinyUI(fluidPage(
                     verbatimTextOutput("estimasi_hasil")
             ),
             tabPanel("Summary",
-                     tableOutput('estimasi_kesimpulan')
+                     DT::dataTableOutput('estimasi_kesimpulan')
             )
           )
           

@@ -1,5 +1,5 @@
 library(shiny)
-library(ggplot2)
+library(DT)
 library(vars)
 library(tseries)
 library(forecast)
@@ -228,11 +228,11 @@ shinyServer(function(input, output) {
         nilai_error <- coef_summary[bar, "Std. Error"]
         nilai_pt <- coef_summary[bar, "Pr(>|t|)"]
         
-        tbl[bar,kol] <- paste(nilai_analisis, nilai_error, nilai_pt)
+        tbl[bar,kol] <- paste(nilai_analisis, '<br>',nilai_error, '<br>',nilai_pt)
       }
     }
     
-    return(as.table(tbl))
+    return(tbl)
   })
   
   arch_test <- reactive({
@@ -250,7 +250,7 @@ shinyServer(function(input, output) {
       vselect$criteria
   })
   
-  output$data_table <- renderDataTable({
+  output$data_table <- DT::renderDataTable({
     if (length(data_sumber()) > 0)
       data_sumber()
   })
@@ -287,7 +287,7 @@ shinyServer(function(input, output) {
   
   
   
-  output$data_transformasi <- renderDataTable({
+  output$data_transformasi <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
@@ -309,7 +309,7 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$data_differencing1 <- renderDataTable({
+  output$data_differencing1 <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
@@ -331,7 +331,7 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$data_differencing2 <- renderDataTable({
+  output$data_differencing2 <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
@@ -353,7 +353,7 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$data_differencing3 <- renderDataTable({
+  output$data_differencing3 <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
@@ -440,10 +440,10 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$estimasi_kesimpulan <- renderTable({
+  output$estimasi_kesimpulan <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
       var_summary()
     }
-  })
+  }, escape=FALSE,options=list(paging=FALSE,processing = FALSE))
   
 })
