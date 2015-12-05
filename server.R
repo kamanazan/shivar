@@ -34,20 +34,24 @@ proses_data <- function(dataset) {
   adf_diff3 <- adf.test(diffd[[3]])
   p.diff3 <- adf_diff3$p.value
   
-  if (p.diff1 < 0.05){
+  if (p.diff1 < 0.05) {
     adf_diff <- adf_diff1
     res.diff <- diffd[[1]]
-  }else if (p.diff2 < 0.05){
+  }else if (p.diff2 < 0.05) {
     adf_diff <- adf_diff2
     res.diff <- diffd[[2]]
-  }else if (p.diff3 < 0.05){
+  }else if (p.diff3 < 0.05) {
     adf_diff <- adf_diff3
     res.diff <- diffd[[3]]
   }
   
-  return(list(d.trans = data.trans, d.diff = res.diff, 
-              adf.trans=adf_trans, adf.diff=adf_diff, adf.asli=adf_asli,
-              df1=diffd[[1]], df2=diffd[[2]], df3=diffd[[3]]))
+  return(
+    list(
+      d.trans = data.trans, d.diff = res.diff,
+      adf.trans = adf_trans, adf.diff = adf_diff, adf.asli = adf_asli,
+      df1 = diffd[[1]], df2 = diffd[[2]], df3 = diffd[[3]]
+    )
+  )
 }
 
 shinyServer(function(input, output) {
@@ -71,9 +75,12 @@ shinyServer(function(input, output) {
       hasil <- proses_data(datanya[,col])
       
       data_proses[[nama_kolom[col]]] <-
-        list(d.diff = hasil$d.diff, d.trans = hasil$d.trans, 
-             adf.trans=hasil$adf.trans, adf.diff=hasil$adf.diff, adf.asli=hasil$adf.asli,
-             df1=hasil$df1, df2=hasil$df2, df3=hasil$df3)
+        list(
+          d.diff = hasil$d.diff, d.trans = hasil$d.trans,
+          adf.trans = hasil$adf.trans, adf.diff = hasil$adf.diff, adf.asli =
+            hasil$adf.asli,
+          df1 = hasil$df1, df2 = hasil$df2, df3 = hasil$df3
+        )
       
     }
     
@@ -81,7 +88,7 @@ shinyServer(function(input, output) {
   })
   
   output$pilih_kolom <- renderUI({
-    if (length(data_sumber()) > 0){
+    if (length(data_sumber()) > 0) {
       kolom <- names(ambil_data())
       selectInput(
         "var_column",
@@ -134,7 +141,7 @@ shinyServer(function(input, output) {
         if (row == 7)
         {
           adf_test <- adf.test(dt[,col])
-
+          
           if (adf_test$p.value[[1]] < 0.05)
           {
             new_sr[row,col] = paste("Stationer: Ya  ")
@@ -157,7 +164,6 @@ shinyServer(function(input, output) {
   })
   
   get_estimation_data <- reactive({
-    
     dt <- data_sumber()
     anu <- ambil_data()
     # Membuat table summary yang baru
@@ -174,16 +180,16 @@ shinyServer(function(input, output) {
       p_diff <- anu[[col]]$adf.diff$p.value
       p_trans <- anu[[col]]$adf.trans$p.value
       
-      if (p_asli < 0.05){
+      if (p_asli < 0.05) {
         datanya <- dt[[col]]
-      }else if(p_trans < 0.05){
+      }else if (p_trans < 0.05) {
         datanya <- anu[[col]]$d.trans
       }else{
         datanya <- anu[[col]]$d.diff
       }
       
       ln <- length(datanya)
-      if (ln < num_of_row){
+      if (ln < num_of_row) {
         selisih <- num_of_row - ln
         for (i in 1:selisih)
           datanya <- c(datanya, NA)
@@ -199,7 +205,8 @@ shinyServer(function(input, output) {
   
   var_analysis <- reactive({
     dt <- get_estimation_data()
-    va <- VAR(dt,p=input$estimasi_p.val,type=input$estimasi_type)
+    va <-
+      VAR(dt,p = input$estimasi_p.val,type = input$estimasi_type)
     return(va)
   })
   
@@ -220,15 +227,16 @@ shinyServer(function(input, output) {
     colnames(tbl) <- nama_kolom
     rownames(tbl) <- nama_baris
     
-    for(kol in nama_kolom){
+    for (kol in nama_kolom) {
       coef_var <- va_res[[kol]]$coefficients
       coef_summary <- va_summ[[kol]]$coefficients
-      for(bar in nama_baris){
+      for (bar in nama_baris) {
         nilai_analisis <- coef_var[[bar]]
         nilai_error <- coef_summary[bar, "Std. Error"]
         nilai_pt <- coef_summary[bar, "Pr(>|t|)"]
         
-        tbl[bar,kol] <- paste(nilai_analisis, '<br>',nilai_error, '<br>',nilai_pt)
+        tbl[bar,kol] <-
+          paste(nilai_analisis, '<br>',nilai_error, '<br>',nilai_pt)
       }
     }
     
@@ -253,7 +261,8 @@ shinyServer(function(input, output) {
   output$data_table <- DT::renderDataTable({
     if (length(data_sumber()) > 0)
       data_sumber()
-  })
+  }, option = list(searching = FALSE,
+                   rownames = FALSE))
   
   output$data_summary <- renderTable({
     if (length(data_sumber()) > 0)
@@ -285,8 +294,6 @@ shinyServer(function(input, output) {
     
   })
   
-  
-  
   output$data_transformasi <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
@@ -307,7 +314,8 @@ shinyServer(function(input, output) {
       
       tbl
     }
-  })
+  }, option = list(searching = FALSE,
+                   rownames = FALSE))
   
   output$data_differencing1 <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
@@ -329,7 +337,8 @@ shinyServer(function(input, output) {
       
       tbl
     }
-  })
+  }, option = list(searching = FALSE,
+                   rownames = FALSE))
   
   output$data_differencing2 <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
@@ -351,7 +360,8 @@ shinyServer(function(input, output) {
       
       tbl
     }
-  })
+  }, option = list(searching = FALSE,
+                   rownames = FALSE))
   
   output$data_differencing3 <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
@@ -373,7 +383,8 @@ shinyServer(function(input, output) {
       
       tbl
     }
-  })
+  }, option = list(searching = FALSE,
+                   rownames = FALSE))
   
   output$hasil_adf <- renderTable({
     if (length(data_sumber()) > 0)
@@ -388,12 +399,12 @@ shinyServer(function(input, output) {
       df <- kolom$d.diff
       par(mfrow = c(1,2))
       plot.ts(
-        dt, main = paste("Plot untuk ",input$var_column, "setelah Transformasi"), ylab =
-          "value"
+        dt, main = paste("Plot untuk ",input$var_column, "setelah Transformasi"),
+        ylab = "value"
       )
       plot.ts(
-        df, main = paste("Plot untuk ",input$var_column, "setelah differencing"), ylab =
-          "value"
+        df, main = paste("Plot untuk ",input$var_column, "setelah differencing"),
+        ylab = "value"
       )
     }
   })
@@ -406,12 +417,12 @@ shinyServer(function(input, output) {
       df <- acf(kolom$d.diff)
       par(mfrow = c(1,2))
       plot(
-        dt, main = paste("ACF untuk ",input$var_column, "setelah Transformasi"), ylab =
-          "value"
+        dt, main = paste("ACF untuk ",input$var_column, "setelah Transformasi"),
+        ylab = "value"
       )
       plot(
-        df, main = paste("ACF untuk ",input$var_column, "setelah differencing"), ylab =
-          "value"
+        df, main = paste("ACF untuk ",input$var_column, "setelah differencing"),
+        ylab = "value"
       )
     }
   })
@@ -424,12 +435,12 @@ shinyServer(function(input, output) {
       df <- pacf(kolom$d.diff)
       par(mfrow = c(1,2))
       plot(
-        dt, main = paste("PACF untuk ",input$var_column, "setelah Transformasi"), ylab =
-          "value"
+        dt, main = paste("PACF untuk ",input$var_column, "setelah Transformasi"),
+        ylab = "value"
       )
       plot(
-        df, main = paste("PACF untuk ",input$var_column, "setelah differencing"), ylab =
-          "value"
+        df, main = paste("PACF untuk ",input$var_column, "setelah differencing"),
+        ylab = "value"
       )
     }
   })
@@ -444,6 +455,11 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       var_summary()
     }
-  }, escape=FALSE,options=list(paging=FALSE,processing = FALSE))
+  }, escape = FALSE,
+  options = list(
+    paging = FALSE,
+    processing = FALSE,
+    searching = FALSE
+  ))
   
 })
