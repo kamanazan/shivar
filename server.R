@@ -3,6 +3,8 @@ library(DT)
 library(vars)
 library(tseries)
 library(forecast)
+library(tools)
+library(xlsx)
 
 #data_sumber <- read.csv("canada.csv")
 
@@ -57,7 +59,12 @@ proses_data <- function(dataset) {
 shinyServer(function(input, output) {
   data_sumber <- reactive({
     if (length(input$sumber_data$name) > 0) {
-      dt <- read.csv(input$sumber_data$datapath)
+      ext <- file_ext(input$sumber_data$name)
+      if (ext == 'csv'){
+        dt <- read.csv(input$sumber_data$datapath)
+      }else if ((ext == 'xls') | (ext == 'xlsx')){
+        dt <- read.xlsx(input$sumber_data$datapath, sheetIndex = 1)
+      }
     }
     else
       dt <- list()
