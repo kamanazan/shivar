@@ -469,4 +469,19 @@ shinyServer(function(input, output) {
     searching = FALSE
   ))
   
+  output$fcst_tbl <- DT::renderDataTable({
+    if (length(data_sumber()) > 0) {
+      va <- var_analysis()
+      pr <- predict(va, n.ahead = input$fcst.time)
+      tbl <- pr$fcst[[input$var_column]]
+      rownames(tbl) <- as.character(c(1:input$fcst.time))
+      tbl
+    }
+  }, escape = FALSE,
+  options = list(
+    paging = FALSE,
+    processing = FALSE,
+    searching = FALSE
+  ))
+  
 })

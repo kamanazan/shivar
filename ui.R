@@ -105,7 +105,14 @@ shinyUI(fluidPage(
           
         ),
         tabPanel(strong('Diagnostic')),
-        tabPanel(strong('Forecasting'))
+        tabPanel(strong('Forecasting'),
+                 sliderInput(
+                   "fcst.time", h4("Prediksi"),
+                   min = 1,
+                   max = 30,
+                   value = 5
+                 ),
+                 DT::dataTableOutput('fcst_tbl'))
         
       )
     )
