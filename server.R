@@ -469,6 +469,18 @@ shinyServer(function(input, output) {
     searching = FALSE
   ))
   
+  output$diagnostic_serial <- renderPrint({
+    if (length(data_sumber()) > 0) {
+      va <- var_analysis()
+      serial.test(va, lags.pt = 16)
+    }
+  })
+  output$diagnostic_normal <- renderPrint({
+    if (length(data_sumber()) > 0) {
+      va <- var_analysis()
+      normality.test(va)
+    }
+  })
   output$fcst_tbl <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
       va <- var_analysis()

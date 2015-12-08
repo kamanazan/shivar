@@ -104,7 +104,10 @@ shinyUI(fluidPage(
           )
           
         ),
-        tabPanel(strong('Diagnostic')),
+        tabPanel(strong('Diagnostic'), tabsetPanel(
+          tabPanel('Serial Test', verbatimTextOutput('diagnostic_serial')),
+          tabPanel('Normality Test', verbatimTextOutput('diagnostic_normal'))
+        )),
         tabPanel(strong('Forecasting'),
                  sliderInput(
                    "fcst.time", h4("Prediksi"),
