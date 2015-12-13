@@ -57,6 +57,12 @@ shinyUI(fluidPage(
           strong("Identifikasi"),
           tabsetPanel(
             tabPanel("Data Hasil Transformasi", DT::dataTableOutput("data_transformasi")),
+            tabPanel("Hasil Test ADF",
+                     selectInput('adf_diff_level', label='Level Differencing', choices = c(1,2,3)),
+                     tableOutput("hasil_adf"),
+                     plotOutput('id_ts'),
+                     plotOutput('id_acf'),
+                     plotOutput('id_pacf')),
             tabPanel("Data Hasil Differencing",
                      selectInput('diff_level', label='Level', choices = c(1,2,3)),
                      conditionalPanel('input.diff_level == 1',
@@ -66,14 +72,10 @@ shinyUI(fluidPage(
                      conditionalPanel('input.diff_level == 3',
                                       DT::dataTableOutput("data_differencing3"))
                      
-            ),
+            )
             #tabPanel("Data Hasil Differencing 2", DT::dataTableOutput("data_differencing2")),
             #tabPanel("Data Hasil Differencing 3", DT::dataTableOutput("data_differencing3")),
-            tabPanel("Hasil Test ADF", 
-                     tableOutput("hasil_adf"),
-                     plotOutput('id_ts'),
-                     plotOutput('id_acf'),
-                     plotOutput('id_pacf'))
+            
           )),
         
         tabPanel(

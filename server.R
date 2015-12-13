@@ -29,7 +29,7 @@ proses_data <- function(dataset) {
     data.diff <- diffd[[i]]
     
   }
-  adf_diff1 <- adf.test(diffd[[2]])
+  adf_diff1 <- adf.test(diffd[[1]])
   p.diff1 <- adf_diff1$p.value
   adf_diff2 <- adf.test(diffd[[2]])
   p.diff2 <- adf_diff2$p.value
@@ -51,6 +51,7 @@ proses_data <- function(dataset) {
     list(
       d.trans = data.trans, d.diff = res.diff,
       adf.trans = adf_trans, adf.diff = adf_diff, adf.asli = adf_asli,
+      adf.diff1 = adf_diff1, adf.diff2 = adf_diff2, adf.diff3 = adf_diff3,
       df1 = diffd[[1]], df2 = diffd[[2]], df3 = diffd[[3]]
     )
   )
@@ -85,7 +86,7 @@ shinyServer(function(input, output) {
         list(
           d.diff = hasil$d.diff, d.trans = hasil$d.trans,
           adf.trans = hasil$adf.trans, adf.diff = hasil$adf.diff, adf.asli =
-            hasil$adf.asli,
+            hasil$adf.asli, adf.diff1 = hasil$adf.diff1, adf.diff2 = hasil$adf.diff2, adf.diff3 = hasil$adf.diff3,
           df1 = hasil$df1, df2 = hasil$df2, df3 = hasil$df3
         )
       
@@ -110,7 +111,14 @@ shinyServer(function(input, output) {
     anu <- ambil_data()
     kolom <- anu[[input$var_column]]
     dt <- kolom$adf.trans
-    df <- kolom$adf.diff
+    #df <- kolom$adf.diff      
+    if (input$adf_diff_level == 1){
+    df <- kolom$adf.diff1
+    } else if (input$adf_diff_level == 2){
+      df <- kolom$adf.diff2
+    } else if (input$adf_diff_level == 3){
+      df <- kolom$adf.diff3
+    }
     # Membuat table summary yang baru
     num_of_col = 2
     num_of_row = 3
