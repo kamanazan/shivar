@@ -249,9 +249,19 @@ shinyServer(function(input, output) {
         nilai_analisis <- coef_var[[bar]]
         nilai_error <- coef_summary[bar, "Std. Error"]
         nilai_pt <- coef_summary[bar, "Pr(>|t|)"]
-        
+        # penentuan signif. codes
+        if (nilai_pt< 0.001){
+          bintang <- '***'
+        } else if ((nilai_pt >= 0.001) & (nilai_pt < 0.01)){
+          bintang <- '**'
+        } else if ((nilai_pt >= 0.01) & (nilai_pt < 0.05)){
+          bintang <- '*'
+        } else if ((nilai_pt >= 0.05) & (nilai_pt < 0.1)){
+          bintang <- '.'
+        } else bintang <- ''
+          
         tbl[bar,kol] <-
-          paste(nilai_analisis, '<br>',nilai_error, '<br>',nilai_pt)
+          paste(nilai_analisis, '<br>',nilai_error, '<br>',nilai_pt,'<strong>',bintang,"</strong>")
       }
     }
     
