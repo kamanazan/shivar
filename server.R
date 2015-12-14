@@ -143,11 +143,11 @@ shinyServer(function(input, output) {
     dt <- data_sumber()
     sr <- summary(dt)
     # Membuat table summary yang baru
-    num_of_col = length(colnames(sr))
+    num_of_col = length(colnames(dt))
     num_of_row = 7
     tot_elm = num_of_row * num_of_col
     new_sr <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
-    colnames(new_sr) <- colnames(sr)
+    colnames(new_sr) <- colnames(dt)
     
     for (col in 1:num_of_col)
     {
@@ -174,7 +174,7 @@ shinyServer(function(input, output) {
       }
     }
     tbl <- as.table(new_sr)
-    row.names(tbl) <- NULL
+    colnames(tbl) <- colnames(sr)
     return(tbl)
   })
   
@@ -330,6 +330,15 @@ shinyServer(function(input, output) {
       tbl
     }
   }, option = list(searching = FALSE,
+                   rownames = FALSE))
+  
+  output$diff_summary <- renderTable({
+    if (length(data_sumber()) > 0){
+      get_summary()
+    }
+     
+  }, option = list(searching = FALSE,
+                   paging = FALSE,
                    rownames = FALSE))
   
   output$data_differencing1 <- DT::renderDataTable({
