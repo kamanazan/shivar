@@ -49,7 +49,7 @@ proses_data <- function(dataset) {
   
   return(
     list(
-      d.trans = data.trans, d.diff = res.diff,
+      d.trans = data.trans, d.diff = res.diff, d.diff1 = diffd[[1]], d.diff2 = diffd[[2]], d.diff3 = diffd[[3]],
       adf.trans = adf_trans, adf.diff = adf_diff, adf.asli = adf_asli,
       adf.diff1 = adf_diff1, adf.diff2 = adf_diff2, adf.diff3 = adf_diff3,
       df1 = diffd[[1]], df2 = diffd[[2]], df3 = diffd[[3]]
@@ -84,7 +84,7 @@ shinyServer(function(input, output) {
       
       data_proses[[nama_kolom[col]]] <-
         list(
-          d.diff = hasil$d.diff, d.trans = hasil$d.trans,
+          d.diff = hasil$d.diff, d.trans = hasil$d.trans,d.diff1 = hasil$d.diff1, d.diff2 = hasil$d.diff2, d.diff3 = hasil$d.diff3,
           adf.trans = hasil$adf.trans, adf.diff = hasil$adf.diff, adf.asli =
             hasil$adf.asli, adf.diff1 = hasil$adf.diff1, adf.diff2 = hasil$adf.diff2, adf.diff3 = hasil$adf.diff3,
           df1 = hasil$df1, df2 = hasil$df2, df3 = hasil$df3
@@ -113,7 +113,7 @@ shinyServer(function(input, output) {
     dt <- kolom$adf.trans
     #df <- kolom$adf.diff      
     if (input$adf_diff_level == 1){
-    df <- kolom$adf.diff1
+      df <- kolom$adf.diff1
     } else if (input$adf_diff_level == 2){
       df <- kolom$adf.diff2
     } else if (input$adf_diff_level == 3){
@@ -420,7 +420,14 @@ shinyServer(function(input, output) {
       anu <- ambil_data()
       kolom <- anu[[input$var_column]]
       dt <- kolom$d.trans
-      df <- kolom$d.diff
+      #df <- kolom$d.diff
+      if (input$adf_diff_level == 1){
+        df <- kolom$d.diff1
+      } else if (input$adf_diff_level == 2){
+        df <- kolom$d.diff2
+      } else if (input$adf_diff_level == 3){
+        df <- kolom$d.diff3
+      }
       par(mfrow = c(1,2))
       plot.ts(
         dt, main = paste("Plot untuk ",input$var_column, "setelah Transformasi"),
@@ -438,7 +445,14 @@ shinyServer(function(input, output) {
       anu <- ambil_data()
       kolom <- anu[[input$var_column]]
       dt <- acf(kolom$d.trans)
-      df <- acf(kolom$d.diff)
+      #df <- kolom$d.diff
+      if (input$adf_diff_level == 1){
+        df <- acf(kolom$d.diff1)
+      } else if (input$adf_diff_level == 2){
+        df <- acf(kolom$d.diff2)
+      } else if (input$adf_diff_level == 3){
+        df <- acf(kolom$d.diff3)
+      }
       par(mfrow = c(1,2))
       plot(
         dt, main = paste("ACF untuk ",input$var_column, "setelah Transformasi"),
@@ -456,7 +470,14 @@ shinyServer(function(input, output) {
       anu <- ambil_data()
       kolom <- anu[[input$var_column]]
       dt <- pacf(kolom$d.trans)
-      df <- pacf(kolom$d.diff)
+      #df <- kolom$d.diff
+      if (input$adf_diff_level == 1){
+        df <- pacf(kolom$d.diff1)
+      } else if (input$adf_diff_level == 2){
+        df <- pacf(kolom$d.diff2)
+      } else if (input$adf_diff_level == 3){
+        df <- pacf(kolom$d.diff3)
+      }
       par(mfrow = c(1,2))
       plot(
         dt, main = paste("PACF untuk ",input$var_column, "setelah Transformasi"),
