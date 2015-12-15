@@ -298,7 +298,7 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       plot.ts(dt[,input$var_column], main = paste("Diagram Fit untuk ",input$var_column), ylab =
-                "value")
+                "value", col='red')
     }
   })
   
@@ -306,7 +306,7 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       resid <- acf(dt[,input$var_column])
-      plot(resid, main = paste("ACF Residual untuk ",input$var_column))
+      plot(resid, main = paste("ACF Residual untuk ",input$var_column),col = 'green')
     }
   })
   
@@ -314,7 +314,7 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       resid <- pacf(dt[,input$var_column],plot = FALSE)
-      plot(resid, main = paste("PACF Residual untuk ",input$var_column))
+      plot(resid, main = paste("PACF Residual untuk ",input$var_column), col = 'blue')
     }
     
   })
@@ -441,11 +441,11 @@ shinyServer(function(input, output) {
       par(mfrow = c(1,2))
       plot.ts(
         dt, main = paste("Plot untuk ",input$var_column, "setelah Transformasi"),
-        ylab = "value"
+        ylab = "value", col = 'green'
       )
       plot.ts(
         df, main = paste("Plot untuk ",input$var_column, "setelah differencing"),
-        ylab = "value"
+        ylab = "value", col = 'red'
       )
     }
   })
@@ -466,11 +466,11 @@ shinyServer(function(input, output) {
       par(mfrow = c(1,2))
       plot(
         dt, main = paste("ACF untuk ",input$var_column, "setelah Transformasi"),
-        ylab = "value"
+        ylab = "value", col = 'green'
       )
       plot(
         df, main = paste("ACF untuk ",input$var_column, "setelah differencing"),
-        ylab = "value"
+        ylab = "value", col = 'red'
       )
     }
   })
@@ -491,11 +491,11 @@ shinyServer(function(input, output) {
       par(mfrow = c(1,2))
       plot(
         dt, main = paste("PACF untuk ",input$var_column, "setelah Transformasi"),
-        ylab = "value"
+        ylab = "value", col = 'green'
       )
       plot(
         df, main = paste("PACF untuk ",input$var_column, "setelah differencing"),
-        ylab = "value"
+        ylab = "value", col = 'red'
       )
     }
   })
