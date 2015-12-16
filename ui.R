@@ -56,7 +56,10 @@ shinyUI(fluidPage(
         tabPanel(
           strong("Identifikasi"),
           tabsetPanel(
-            tabPanel("Data Hasil Transformasi", DT::dataTableOutput("data_transformasi")),
+            tabPanel("Data Hasil Transformasi", 
+                     DT::dataTableOutput("lambda_transformasi"),
+                     br(),
+                     DT::dataTableOutput("data_transformasi")),
             tabPanel("Hasil Test ADF",
                      selectInput('adf_diff_level', label='Level Differencing', choices = c(1,2,3)),
                      tableOutput("hasil_adf"),
@@ -119,7 +122,11 @@ shinyUI(fluidPage(
                    max = 30,
                    value = 5
                  ),
-                 DT::dataTableOutput('fcst_tbl'))
+                 DT::dataTableOutput('fcst_tbl'),
+                 br(),
+                 plotOutput('irf_plot')
+       )
+                 
         
       )
     )

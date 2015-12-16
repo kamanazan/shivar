@@ -52,7 +52,7 @@ proses_data <- function(dataset) {
       d.trans = data.trans, d.diff = res.diff, d.diff1 = diffd[[1]], d.diff2 = diffd[[2]], d.diff3 = diffd[[3]],
       adf.trans = adf_trans, adf.diff = adf_diff, adf.asli = adf_asli,
       adf.diff1 = adf_diff1, adf.diff2 = adf_diff2, adf.diff3 = adf_diff3,
-      df1 = diffd[[1]], df2 = diffd[[2]], df3 = diffd[[3]]
+      df1 = diffd[[1]], df2 = diffd[[2]], df3 = diffd[[3]], lambda = lambda
     )
   )
 }
@@ -87,7 +87,7 @@ shinyServer(function(input, output) {
           d.diff = hasil$d.diff, d.trans = hasil$d.trans,d.diff1 = hasil$d.diff1, d.diff2 = hasil$d.diff2, d.diff3 = hasil$d.diff3,
           adf.trans = hasil$adf.trans, adf.diff = hasil$adf.diff, adf.asli =
             hasil$adf.asli, adf.diff1 = hasil$adf.diff1, adf.diff2 = hasil$adf.diff2, adf.diff3 = hasil$adf.diff3,
-          df1 = hasil$df1, df2 = hasil$df2, df3 = hasil$df3
+          df1 = hasil$df1, df2 = hasil$df2, df3 = hasil$df3, lambda = hasil$lambda
         )
       
     }
@@ -220,8 +220,10 @@ shinyServer(function(input, output) {
   
   var_analysis <- reactive({
     dt <- get_estimation_data()
+    var_p <<- input$estimasi_p.val
+    var_type <<- input$estimasi_type
     va <-
-      VAR(dt,p = input$estimasi_p.val,type = input$estimasi_type)
+      VAR(dt,p = var_p, type = var_type)
     return(va)
   })
   
@@ -319,11 +321,36 @@ shinyServer(function(input, output) {
     
   })
   
+  output$lambda_transformasi <- DT::renderDataTable({
+    if (length(data_sumber()) > 0) {
+      dt <- data_sumber()
+      anu <- ambil_data()
+      
+      num_of_col = length(names(anu))
+      num_of_row = 1
+      tot_elm = num_of_row * num_of_col
+      tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
+      colnames(tbl) <- names(anu)
+      
+      for (col in 1:num_of_col) {
+        nama_kolom <- colnames(tbl)[col]
+        datanya <- anu[[col]]$lambda
+        tbl[,col] <- datanya
+      }
+      
+      tbl
+    }
+  }, option = list(searching = FALSE,
+                   rownames = FALSE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: top; text-align: center;',
+    htmltools::strong('Nilai Lambda')
+  ))
+  
   output$data_transformasi <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
-      # Membuat table summary yang baru
       
       num_of_col = length(names(anu))
       num_of_row = length(dt[,1])
@@ -340,7 +367,11 @@ shinyServer(function(input, output) {
       tbl
     }
   }, option = list(searching = FALSE,
-                   rownames = FALSE))
+                   rownames = FALSE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: top; text-align: center;',
+    htmltools::strong('Data Transformasi')
+  ))
   
   output$diff_summary <- renderTable({
     if (length(data_sumber()) > 0){
@@ -355,7 +386,6 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
-      # Membuat table summary yang baru
       
       num_of_col = length(names(anu))
       num_of_row = length(anu[[1]]$df1)
@@ -378,7 +408,6 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
-      # Membuat table summary yang baru
       
       num_of_col = length(names(anu))
       num_of_row = length(anu[[1]]$df2)
@@ -401,7 +430,6 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       anu <- ambil_data()
-      # Membuat table summary yang baru
       
       num_of_col = length(names(anu))
       num_of_row = length(anu[[1]]$df3)
@@ -523,12 +551,14 @@ shinyServer(function(input, output) {
       serial.test(va, lags.pt = 16)
     }
   })
+  
   output$diagnostic_normal <- renderPrint({
     if (length(data_sumber()) > 0) {
       va <- var_analysis()
       normality.test(va)
     }
   })
+  
   output$fcst_tbl <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
       va <- var_analysis()
@@ -543,5 +573,14 @@ shinyServer(function(input, output) {
     processing = FALSE,
     searching = FALSE
   ))
+  
+  output$irf_plot <- renderPlot({
+    if (length(data_sumber()) > 0) {
+      va <- var_analysis()
+      var_list <- names(va$varresult)
+      va2 <- irf(va, impulse=input$var_column, response=var_list[!is.element(var_list, input$var_column)])
+      plot(va2)
+    }
+  })
   
 })
