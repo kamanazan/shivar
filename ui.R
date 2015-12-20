@@ -105,16 +105,23 @@ shinyUI(fluidPage(
           tabPanel('Serial Test', verbatimTextOutput('diagnostic_serial')),
           tabPanel('Normality Test', verbatimTextOutput('diagnostic_normal'))
         )),
-        tabPanel(strong('Forecasting'),
-                 sliderInput(
-                   "fcst.time", h4("Prediksi"),
-                   min = 1,
-                   max = 30,
-                   value = 5
-                 ),
-                 DT::dataTableOutput('fcst_tbl'),
-                 br(),
-                 plotOutput('irf_plot')
+        tabPanel(
+          strong('Forecasting'),
+          tabsetPanel(
+            tabPanel('Forecasting',
+                   sliderInput(
+                     "fcst.time", h4("Prediksi"),
+                     min = 1,
+                     max = 30,
+                     value = 5
+                   ),
+                   DT::dataTableOutput('fcst_tbl'),
+                   br(),
+                   plotOutput('irf_plot')
+          ),
+          tabPanel('Anti Transformasi', DT::dataTableOutput('fcst_anti.trans')),
+          tabPanel('Anti Differencing', DT::dataTableOutput('fcst_anti.diff'))
+        )
        )
                  
         

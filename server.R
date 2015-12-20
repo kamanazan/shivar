@@ -47,12 +47,17 @@ proses_data <- function(dataset) {
     res.diff <- diffd[[3]]
   }
   
+  # dibuat anti-nya
+  anti.diff <- diffinv(res.diff, lag=1,differences=1)
+  anti.trans <- InvBoxCox(data.trans,lambda=lambda)
+  
   return(
     list(
       d.trans = data.trans, d.diff = res.diff, d.diff1 = diffd[[1]], d.diff2 = diffd[[2]], d.diff3 = diffd[[3]],
       adf.trans = adf_trans, adf.diff = adf_diff, adf.asli = adf_asli,
       adf.diff1 = adf_diff1, adf.diff2 = adf_diff2, adf.diff3 = adf_diff3,
-      df1 = diffd[[1]], df2 = diffd[[2]], df3 = diffd[[3]], lambda = round(lambda, digits=3)
+      df1 = diffd[[1]], df2 = diffd[[2]], df3 = diffd[[3]], lambda = round(lambda, digits=3),
+      anti.diff = anti.diff, anti.trans = anti.trans
     )
   )
 }
@@ -87,7 +92,7 @@ shinyServer(function(input, output) {
           d.diff = hasil$d.diff, d.trans = hasil$d.trans,d.diff1 = hasil$d.diff1, d.diff2 = hasil$d.diff2, d.diff3 = hasil$d.diff3,
           adf.trans = hasil$adf.trans, adf.diff = hasil$adf.diff, adf.asli =
             hasil$adf.asli, adf.diff1 = hasil$adf.diff1, adf.diff2 = hasil$adf.diff2, adf.diff3 = hasil$adf.diff3,
-          df1 = hasil$df1, df2 = hasil$df2, df3 = hasil$df3, lambda = hasil$lambda
+          df1 = hasil$df1, df2 = hasil$df2, df3 = hasil$df3, lambda = hasil$lambda, anti.diff = hasil$anti.diff, anti.trans = hasil$anti.trans
         )
       
     }
@@ -595,5 +600,56 @@ shinyServer(function(input, output) {
       plot(va2)
     }
   })
+  
+  output$fcst_anti.trans <- DT::renderDataTable({
+    if (length(data_sumber()) > 0) {
+      dt <- data_sumber()
+      anu <- ambil_data()
+      
+      num_of_col = length(names(anu))
+      num_of_row = length(anu[[1]]$anti.trans)
+      tot_elm = num_of_row * num_of_col
+      tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
+      colnames(tbl) <- names(anu)
+      
+      for (col in 1:num_of_col) {
+        nama_kolom <- colnames(tbl)[col]
+        datanya <- anu[[col]]$anti.trans
+        tbl[,col] <- datanya
+      }
+      
+      tbl
+    }
+  }, option = list(searching = FALSE,
+                   rownames = FALSE))
+  
+  output$fcst_anti.diff <- DT::renderDataTable({
+    if (length(data_sumber()) > 0) {
+      dt <- data_sumber()
+      anu <- ambil_data()
+      
+      num_of_col = length(names(anu))
+      num_of_row = length(dt[,1])
+      tot_elm = num_of_row * num_of_col
+      tbl <- array(1:tot_elm, dim = c(num_of_row, num_of_col))
+      colnames(tbl) <- names(anu)
+      
+      for (col in 1:num_of_col) {
+        nama_kolom <- colnames(tbl)[col]
+        datanya <- anu[[col]]$anti.diff
+        ln <- length(datanya)
+        if (ln < num_of_row) { # karena level diff setiap kolom bisa berbeda
+          selisih <- num_of_row - ln
+          for (i in 1:selisih)
+            datanya <- c(datanya, NA)
+        }
+        
+        tbl[,col] <- datanya
+      }
+      
+      tbl
+    }
+  }, option = list(searching = FALSE,
+                   rownames = FALSE))
   
 })
