@@ -52,7 +52,7 @@ proses_data <- function(dataset) {
       d.trans = data.trans, d.diff = res.diff, d.diff1 = diffd[[1]], d.diff2 = diffd[[2]], d.diff3 = diffd[[3]],
       adf.trans = adf_trans, adf.diff = adf_diff, adf.asli = adf_asli,
       adf.diff1 = adf_diff1, adf.diff2 = adf_diff2, adf.diff3 = adf_diff3,
-      df1 = diffd[[1]], df2 = diffd[[2]], df3 = diffd[[3]], lambda = lambda
+      df1 = diffd[[1]], df2 = diffd[[2]], df3 = diffd[[3]], lambda = round(lambda, digits=3)
     )
   )
 }
