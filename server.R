@@ -6,7 +6,7 @@ library(forecast)
 library(tools)
 library(xlsx)
 
-#data_sumber <- read.csv("canada.csv")
+p.val <- 1
 
 proses_data <- function(dataset) {
   adf_asli <- adf.test(dataset)
@@ -222,9 +222,19 @@ shinyServer(function(input, output) {
     return(tbl[1:row_used,])
   })
   
+  var_select <- reactive({
+    dt <- data_sumber()
+    nama_kolom <- colnames(dt)
+    num_of_col <- length(nama_kolom)
+    vs <-
+      VARselect(dt[,2:num_of_col],lag.max = 5)
+    p.val <<- min(vs$selection)
+    return(vs)
+  })
+  
   var_analysis <- reactive({
     dt <- get_estimation_data()
-    var_p <<- input$estimasi_p.val
+    var_p <<- p.val
     var_type <<- input$estimasi_type
     va <-
       VAR(dt,p = var_p, type = var_type)
@@ -283,10 +293,9 @@ shinyServer(function(input, output) {
     return(stability(var_analysis()))
   })
   
-  output$var_select <- renderDataTable({
-    vselect <- var_process()
-    if (!is.null(vselect))
-      vselect$criteria
+  output$var_select <- renderPrint({
+    if (length(data_sumber()) > 0)
+      var_select()
   })
   
   output$data_table <- DT::renderDataTable({

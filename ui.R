@@ -77,8 +77,8 @@ shinyUI(fluidPage(
                      conditionalPanel('input.diff_level == 3',
                                       DT::dataTableOutput("data_differencing3"))
                      
-            )
-            #tabPanel("Data Hasil Differencing 2", DT::dataTableOutput("data_differencing2")),
+            ),
+            tabPanel("Penentuan Lag", verbatimTextOutput("var_select"))
             #tabPanel("Data Hasil Differencing 3", DT::dataTableOutput("data_differencing3")),
             
           )),
@@ -87,22 +87,12 @@ shinyUI(fluidPage(
           strong("Estimasi"),
           tabsetPanel(
             tabPanel("Analisis VAR",
-                     fluidRow(
-                       column(4,
-                              selectInput(
-                                "estimasi_type",
-                                label = "Tipe",
-                                choices = c('Constant' = 'const', 'Trend' = 'trend', 'Both' = 'both', 'None' = 'none'),
-                                selected = 'const'
-                       )),
-                       column(4,
-                              sliderInput(
-                                "estimasi_p.val", h4("Nilai P"),
-                                min = 1,
-                                max = 5,
-                                value = 1
-                      ))
-                    ),
+                     selectInput(
+                       "estimasi_type",
+                       label = "Tipe",
+                       choices = c('Constant' = 'const', 'Trend' = 'trend', 'Both' = 'both', 'None' = 'none'),
+                       selected = 'const'
+                     ),
                     verbatimTextOutput("estimasi_hasil")
             ),
             tabPanel("Summary",
