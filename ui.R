@@ -25,9 +25,9 @@ shinyUI(fluidPage(
     sidebarPanel(
       #textInput("ticker", h3("Security ticker"), value="SPY"),
       
-      h3("Pengaturan VAR"),
+      h3("Upload Data"),
       
-      fileInput("sumber_data", label = "pilih data"),
+      fileInput("sumber_data", label = "upload"),
       
       uiOutput('pilih_kolom'),
       
@@ -122,6 +122,13 @@ shinyUI(fluidPage(
           tabPanel('Anti Transformasi', DT::dataTableOutput('fcst_anti.trans')),
           tabPanel('Anti Differencing', DT::dataTableOutput('fcst_anti.diff'))
         )
+       ),
+       tabPanel(
+         strong('Summary Analisis'),
+         verbatimTextOutput("summary_estimasi_hasil"),
+         verbatimTextOutput('summary_diag_serial'),
+         verbatimTextOutput('summary_diag_normal'),
+         DT::dataTableOutput('summary_fcst_tbl')
        )
                  
         

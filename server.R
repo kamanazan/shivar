@@ -6,7 +6,7 @@ library(forecast)
 library(tools)
 library(xlsx)
 
-p.val <- 1
+p.val <- 2
 
 proses_data <- function(dataset) {
   adf_asli <- adf.test(dataset)
@@ -651,5 +651,40 @@ shinyServer(function(input, output) {
     }
   }, option = list(searching = FALSE,
                    rownames = FALSE))
+  
+  output$summary_estimasi_hasil <- renderPrint({
+    if (length(data_sumber()) > 0) {
+      var_analysis()
+    }
+  })
+  
+  output$summary_diag_serial <- renderPrint({
+    if (length(data_sumber()) > 0) {
+      va <- var_analysis()
+      serial.test(va, lags.pt = 16)
+    }
+  })
+  
+  output$summary_diag_normal <- renderPrint({
+    if (length(data_sumber()) > 0) {
+      va <- var_analysis()
+      normality.test(va)
+    }
+  })
+  
+  output$summary_fcst_tbl <- DT::renderDataTable({
+    if (length(data_sumber()) > 0) {
+      va <- var_analysis()
+      pr <- predict(va, n.ahead = 30)
+      tbl <- pr$fcst[[input$var_column]]
+      rownames(tbl) <- as.character(c(1:30))
+      tbl
+    }
+  }, escape = FALSE,
+  options = list(
+    paging = FALSE,
+    processing = FALSE,
+    searching = FALSE
+  ))
   
 })
