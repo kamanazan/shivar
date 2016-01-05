@@ -129,6 +129,20 @@ shinyUI(fluidPage(
          verbatimTextOutput('summary_diag_serial'),
          verbatimTextOutput('summary_diag_normal'),
          DT::dataTableOutput('summary_fcst_tbl')
+       ),
+       tabPanel(
+         strong('Help'),
+         br(),
+         p(span("Sebelum memakai aplikasi, upload file yang akan dianalisis menggunakan tombol [Browse] yang ada disebelah kiri"),  style="color:#990000"),
+         h4(strong("Penjelasan Menu")),
+         p(strong("Data"), "Untuk melihat isi data yang sudah di-upload."),
+         p(strong("Plots"), "Untuk melihat plot dari data yang di-upload."),
+         p(strong("Identifikasi"),"Di menu ini data diolah menjadi stasioner."),
+         p(strong("Estimasi"), "Menerapkan teknik VAR(Vector Auto Regressive) pada data yang sudah diolah di menu 'Identifikasi'."),
+         p(strong("Diagnostic"), "Melakukan pengujian pada hasil perhitungan VAR."),
+         p(strong("Forecasting"), "Melakukan prediksi sampai 30 tahun kedepan"),
+         p(strong("Summary Analisis"), "Menampilkan kesimpulan dari proses estimasi sampai prediksi"),
+         br()
        )
                  
         
