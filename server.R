@@ -7,6 +7,9 @@ library(tools)
 library(xlsx)
 
 p.val <- 2
+plot_settings <- par(ps = 14, cex = 1, 
+                     cex.main = 1, 
+                     lwd = 2)
 
 proses_data <- function(dataset) {
   adf_asli <- adf.test(dataset)
@@ -112,9 +115,33 @@ shinyServer(function(input, output) {
     }
   })
   
+  output$pilih_kolom2 <- renderUI({
+    if (length(data_sumber()) > 0) {
+      kolom <- names(ambil_data())
+      selectInput(
+        "var_column2",
+        label = "Kolom yang diamati",
+        choices = kolom,
+        selected = kolom[2]
+      )
+    }
+  })
+  
+  output$pilih_kolom3 <- renderUI({
+    if (length(data_sumber()) > 0) {
+      kolom <- names(ambil_data())
+      selectInput(
+        "var_column3",
+        label = "Kolom yang diamati",
+        choices = kolom,
+        selected = kolom[2]
+      )
+    }
+  })
+  
   ringkasan_adf <- reactive({
     anu <- ambil_data()
-    kolom <- anu[[input$var_column]]
+    kolom <- anu[[input$var_column2]]
     dt <- kolom$adf.trans
     #df <- kolom$adf.diff      
     if (input$adf_diff_level == 1){
@@ -317,24 +344,27 @@ shinyServer(function(input, output) {
   output$asli_ts <- renderPlot({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
+      par(plot_settings)
       plot.ts(dt[,input$var_column], main = paste("Diagram Fit untuk ",input$var_column), ylab =
-                "value", col='red')
+                "value", col='red', lwd = 2)
     }
   })
   
   output$asli_acf <- renderPlot({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
+      par(plot_settings)
       resid <- acf(dt[,input$var_column])
-      plot(resid, main = paste("ACF Residual untuk ",input$var_column),col = 'green')
+      plot(resid, main = paste("ACF Residual untuk ",input$var_column),col = 'green', lwd = 2)
     }
   })
   
   output$asli_pacf <- renderPlot({
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
+      par(plot_settings)
       resid <- pacf(dt[,input$var_column],plot = FALSE)
-      plot(resid, main = paste("PACF Residual untuk ",input$var_column), col = 'blue')
+      plot(resid, main = paste("PACF Residual untuk ",input$var_column), col = 'blue', lwd = 2)
     }
     
   })
@@ -474,7 +504,7 @@ shinyServer(function(input, output) {
   output$id_ts <- renderPlot({
     if (length(data_sumber()) > 0) {
       anu <- ambil_data()
-      kolom <- anu[[input$var_column]]
+      kolom <- anu[[input$var_column2]]
       dt <- kolom$d.trans
       #df <- kolom$d.diff
       if (input$adf_diff_level == 1){
@@ -484,13 +514,15 @@ shinyServer(function(input, output) {
       } else if (input$adf_diff_level == 3){
         df <- kolom$d.diff3
       }
-      par(mfrow = c(1,2))
+      par(ps = 14, cex = 1, 
+          cex.main = 1, 
+          lwd = 2, mfrow = c(1,2))
       plot.ts(
-        dt, main = paste("Plot untuk ",input$var_column, "setelah Transformasi"),
+        dt, main = paste("Plot untuk ",input$var_column2, "setelah Transformasi"),
         ylab = "value", col = 'green'
       )
       plot.ts(
-        df, main = paste("Plot untuk ",input$var_column, "setelah differencing"),
+        df, main = paste("Plot untuk ",input$var_column2, "setelah differencing"),
         ylab = "value", col = 'red'
       )
     }
@@ -499,7 +531,7 @@ shinyServer(function(input, output) {
   output$id_acf <- renderPlot({
     if (length(data_sumber()) > 0) {
       anu <- ambil_data()
-      kolom <- anu[[input$var_column]]
+      kolom <- anu[[input$var_column2]]
       dt <- acf(kolom$d.trans)
       #df <- kolom$d.diff
       if (input$adf_diff_level == 1){
@@ -509,13 +541,15 @@ shinyServer(function(input, output) {
       } else if (input$adf_diff_level == 3){
         df <- acf(kolom$d.diff3)
       }
-      par(mfrow = c(1,2))
+      par(ps = 14, cex = 1, 
+          cex.main = 1, 
+          lwd = 2, mfrow = c(1,2))
       plot(
-        dt, main = paste("ACF untuk ",input$var_column, "setelah Transformasi"),
+        dt, main = paste("ACF untuk ",input$var_column2, "setelah Transformasi"),
         ylab = "value", col = 'green'
       )
       plot(
-        df, main = paste("ACF untuk ",input$var_column, "setelah differencing"),
+        df, main = paste("ACF untuk ",input$var_column2, "setelah differencing"),
         ylab = "value", col = 'red'
       )
     }
@@ -524,7 +558,7 @@ shinyServer(function(input, output) {
   output$id_pacf <- renderPlot({
     if (length(data_sumber()) > 0) {
       anu <- ambil_data()
-      kolom <- anu[[input$var_column]]
+      kolom <- anu[[input$var_column2]]
       dt <- pacf(kolom$d.trans)
       #df <- kolom$d.diff
       if (input$adf_diff_level == 1){
@@ -534,13 +568,15 @@ shinyServer(function(input, output) {
       } else if (input$adf_diff_level == 3){
         df <- pacf(kolom$d.diff3)
       }
-      par(mfrow = c(1,2))
+      par(ps = 14, cex = 1, 
+          cex.main = 1, 
+          lwd = 2, mfrow = c(1,2))
       plot(
-        dt, main = paste("PACF untuk ",input$var_column, "setelah Transformasi"),
+        dt, main = paste("PACF untuk ",input$var_column2, "setelah Transformasi"),
         ylab = "value", col = 'green'
       )
       plot(
-        df, main = paste("PACF untuk ",input$var_column, "setelah differencing"),
+        df, main = paste("PACF untuk ",input$var_column2, "setelah differencing"),
         ylab = "value", col = 'red'
       )
     }
@@ -581,7 +617,7 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       va <- var_analysis()
       pr <- predict(va, n.ahead = input$fcst.time)
-      tbl <- pr$fcst[[input$var_column]]
+      tbl <- pr$fcst[[input$var_column3]]
       rownames(tbl) <- as.character(c(1:input$fcst.time))
       tbl
     }
@@ -596,7 +632,8 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       va <- var_analysis()
       var_list <- names(va$varresult)
-      va2 <- irf(va, impulse=input$var_column, response=var_list[!is.element(var_list, input$var_column)])
+      va2 <- irf(va, impulse=input$var_column3, response=var_list[!is.element(var_list, input$var_column3)])
+      par(plot_settings)
       plot(va2)
     }
   })
@@ -676,7 +713,7 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       va <- var_analysis()
       pr <- predict(va, n.ahead = 30)
-      tbl <- pr$fcst[[input$var_column]]
+      tbl <- pr$fcst[[input$var_column3]]
       rownames(tbl) <- as.character(c(1:30))
       tbl
     }
