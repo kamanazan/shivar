@@ -325,6 +325,21 @@ shinyServer(function(input, output) {
     return(stability(var_analysis()))
   })
   
+  
+  get_forecasting <- reactive({
+    kolom <- input$var_column3
+    if (length(kolom) == 0){
+      kolom <- input$var_column
+    }
+    va <- var_analysis()
+    var_list <- names(va$varresult)
+    va2 <- irf(va, impulse=kolom, response=var_list[!is.element(var_list, kolom)])
+    par(plot_settings)
+    plot(va2)
+  })
+  
+  
+  
   output$var_select <- renderPrint({
     if (length(data_sumber()) > 0)
       var_select()
@@ -345,7 +360,7 @@ shinyServer(function(input, output) {
     if (length(data_sumber()) > 0) {
       dt <- data_sumber()
       par(plot_settings)
-      plot.ts(dt[,input$var_column], main = paste("Diagram Fit untuk ",input$var_column), ylab =
+      plot.ts(dt[,input$var_column], main = paste(" Gambar 1 : Plot Time Series ",input$var_column), ylab =
                 "value", col='red', lwd = 2)
     }
   })
@@ -355,7 +370,7 @@ shinyServer(function(input, output) {
       dt <- data_sumber()
       par(plot_settings)
       resid <- acf(dt[,input$var_column])
-      plot(resid, main = paste("ACF Residual untuk ",input$var_column),col = 'green', lwd = 2)
+      plot(resid, main = paste("Gambar 2 : Plot Auto Correlation Function ",input$var_column),col = 'green', lwd = 2)
     }
   })
   
@@ -364,7 +379,7 @@ shinyServer(function(input, output) {
       dt <- data_sumber()
       par(plot_settings)
       resid <- pacf(dt[,input$var_column],plot = FALSE)
-      plot(resid, main = paste("PACF Residual untuk ",input$var_column), col = 'blue', lwd = 2)
+      plot(resid, main = paste("Gambar 3: Plot Partial Auto Correlation Function ",input$var_column), col = 'blue', lwd = 2)
     }
     
   })
@@ -391,8 +406,8 @@ shinyServer(function(input, output) {
   }, option = list(searching = FALSE,
                    rownames = FALSE),
   caption = htmltools::tags$caption(
-    style = 'caption-side: top; text-align: center;',
-    htmltools::strong('Nilai Lambda')
+    style = 'caption-side: bottom; text-align: center;',
+    htmltools::strong('Transformasi dengan Boxcox, ditransformasi berdasarkan nilai lambda')
   ))
   
   output$data_transformasi <- DT::renderDataTable({
@@ -417,8 +432,8 @@ shinyServer(function(input, output) {
   }, option = list(searching = FALSE,
                    rownames = FALSE),
   caption = htmltools::tags$caption(
-    style = 'caption-side: top; text-align: center;',
-    htmltools::strong('Data Transformasi')
+    style = 'caption-side: bottom; text-align: center;',
+    htmltools::strong('Hasil transformasi dari data berdasarkan nilai lambda')
   ))
   
   output$diff_summary <- renderTable({
@@ -450,7 +465,12 @@ shinyServer(function(input, output) {
       tbl
     }
   }, option = list(searching = FALSE,
-                   rownames = FALSE))
+                   rownames = FALSE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    htmltools::strong('Data setelah di lakukan differensing')
+  )
+  )
   
   output$data_differencing2 <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
@@ -472,7 +492,12 @@ shinyServer(function(input, output) {
       tbl
     }
   }, option = list(searching = FALSE,
-                   rownames = FALSE))
+                   rownames = FALSE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    htmltools::strong('Data setelah di lakukan differensing')
+  )
+  )
   
   output$data_differencing3 <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
@@ -494,7 +519,12 @@ shinyServer(function(input, output) {
       tbl
     }
   }, option = list(searching = FALSE,
-                   rownames = FALSE))
+                   rownames = FALSE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    htmltools::strong('Data setelah di lakukan differensing')
+  )
+  )
   
   output$hasil_adf <- renderTable({
     if (length(data_sumber()) > 0)
@@ -597,7 +627,12 @@ shinyServer(function(input, output) {
     paging = FALSE,
     processing = FALSE,
     searching = FALSE
-  ))
+  ),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    htmltools::strong('Hasil penaksiran parameter dengan menggunakan metode least square yang sudah ditabelkan')
+  )
+  )
   
   output$diagnostic_serial <- renderPrint({
     if (length(data_sumber()) > 0) {
@@ -615,9 +650,13 @@ shinyServer(function(input, output) {
   
   output$fcst_tbl <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
+      kolom <- input$var_column3
+      if (length(kolom) == 0){
+        kolom <- input$var_column
+      }
       va <- var_analysis()
       pr <- predict(va, n.ahead = input$fcst.time)
-      tbl <- pr$fcst[[input$var_column3]]
+      tbl <- pr$fcst[[kolom]]
       rownames(tbl) <- as.character(c(1:input$fcst.time))
       tbl
     }
@@ -626,15 +665,17 @@ shinyServer(function(input, output) {
     paging = FALSE,
     processing = FALSE,
     searching = FALSE
+  ),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    htmltools::strong('Hasil forecasting titik maupun interval  maksimum 30 hasil prediksi')
   ))
   
   output$irf_plot <- renderPlot({
     if (length(data_sumber()) > 0) {
-      va <- var_analysis()
-      var_list <- names(va$varresult)
-      va2 <- irf(va, impulse=input$var_column3, response=var_list[!is.element(var_list, input$var_column3)])
-      par(plot_settings)
-      plot(va2)
+      tst  <- input$var_column3
+      get_forecasting()
+      
     }
   })
   
@@ -658,7 +699,11 @@ shinyServer(function(input, output) {
       tbl
     }
   }, option = list(searching = FALSE,
-                   rownames = FALSE))
+                   rownames = FALSE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    htmltools::strong('Hasil anti transformasi data forecasting')
+  ))
   
   output$fcst_anti.diff <- DT::renderDataTable({
     if (length(data_sumber()) > 0) {
@@ -687,7 +732,12 @@ shinyServer(function(input, output) {
       tbl
     }
   }, option = list(searching = FALSE,
-                   rownames = FALSE))
+                   rownames = FALSE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    htmltools::strong('Hasil anti differencing data forecasting')
+  )
+  )
   
   output$summary_estimasi_hasil <- renderPrint({
     if (length(data_sumber()) > 0) {

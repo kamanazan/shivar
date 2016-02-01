@@ -3,18 +3,6 @@ shinyUI(
     windowTitle = "Model Proyeksi Pertumbuhan Ekonomi Jabar", 	
     header = h1(style="text-align:center;","Model Proyeksi Pertumbuhan Ekonomi Jabar"),
     fluid = TRUE,
-#     tabPanel("Upload Data",
-#       fluidRow(
-#         column(3),
-#         column(3,
-#           fileInput("sumber_data", 
-#                    label = "upload"
-#           )
-#         ),
-#         column(3)
-#         
-#       )
-#     ),
     tabPanel("Data",
       mainPanel(
         tabsetPanel(
@@ -63,6 +51,7 @@ shinyUI(
               )
             ),
             tableOutput("hasil_adf"),
+            span("Hasil pengujian ADF, jika nilai p-value< 0,05 berarti data sudah stasioner"),
             plotOutput('id_ts'),
             plotOutput('id_acf'),
             plotOutput('id_pacf')
@@ -70,7 +59,8 @@ shinyUI(
           tabPanel("Data Hasil Differencing",
             selectInput('diff_level', label='Level', choices = c(0,1,2,3)),
             conditionalPanel('input.diff_level == 0', 
-              tableOutput("diff_summary")
+              tableOutput("diff_summary"),
+              span("Data setelah di lakukan differensing")
             ),
             conditionalPanel('input.diff_level == 1',
               DT::dataTableOutput("data_differencing1")
@@ -83,7 +73,9 @@ shinyUI(
             )
           ),
           tabPanel("Penentuan Lag", 
-            verbatimTextOutput("var_select")
+            verbatimTextOutput("var_select"),
+            span("Penentuan Lag untuk menentukan model terbaik"),
+            span("ditentukan berdasarkan nilai mayoritas(terbanyak) dan nilai lag terkecil")
           )
         )
       )
@@ -98,6 +90,8 @@ shinyUI(
              choices = c('Constant' = 'const', 'Trend' = 'trend', 'Both' = 'both', 'None' = 'none'),
              selected = 'const'
             ),
+            span("Hasil penaksiran parameter dengan menggunakan metode least square"),
+            br(),
             verbatimTextOutput("estimasi_hasil")
           ),
           tabPanel("Summary",
@@ -108,11 +102,17 @@ shinyUI(
     ),
     tabPanel("Diagnostik",
       mainPanel(
-        tabPanel('Serial Test', 
+        tabPanel('Serial Test',
+          span("Hasil Diagnostik check jika p-value>5% maka residual sudah independent"),
+          br(),
           verbatimTextOutput('diagnostic_serial')
+          
         ),
         tabPanel('Normality Test', 
+          span("Hasil Uji Normalitas jika p-value>5% maka residual sudah mengikuti distribusi Normal"),
+          br(),
           verbatimTextOutput('diagnostic_normal')
+          
         )
       )
     ),
@@ -135,7 +135,8 @@ shinyUI(
             ),
             DT::dataTableOutput('fcst_tbl'),
             br(),
-            plotOutput('irf_plot')
+            plotOutput('irf_plot'),
+            span("lamanya pengaruh dari shock suatu variabel terhadap variabel lain sampai pengaruhnya hilang atau kembali ke titik keseimbangan")
           ),
           tabPanel('Anti Transformasi', 
             DT::dataTableOutput('fcst_anti.trans')
@@ -148,6 +149,8 @@ shinyUI(
     ),
     tabPanel("Summary Analysis",
       mainPanel(
+        span("Model terbaik berdasarkan penentuan lag pada sub menu penentuan lag"),
+        br(),
         verbatimTextOutput("summary_estimasi_hasil"),
         verbatimTextOutput('summary_diag_serial'),
         verbatimTextOutput('summary_diag_normal'),
